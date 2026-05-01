@@ -6,14 +6,21 @@ pipeline {
     }
 
     stages {
-        stage('Node version') {
+        stage('Install dependencies') {
             steps {
+                dir('backend') {
+                    sh 'npm install --no-audit'
+                }
+            }
+        }
+        stage('NPM Dependencies Audit') {
+            steps {
+                dir('backend') {
                 sh '''
-                echo "Workspace:"
-                pwd
-                echo "files:"
-                ls -la
-                '''
+                    npm audit --audit-level=critical
+                        echo $?
+                    '''
+                }
             }
         }
     }
