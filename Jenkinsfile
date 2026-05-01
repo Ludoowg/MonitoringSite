@@ -9,8 +9,10 @@ pipeline {
         stage('Node version') {
             steps {
                 sh '''
-                node -v
-                npm -v
+                echo "Workspace:"
+                pwd
+                echo "files:"
+                ls -la
                 '''
             }
         }
