@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MonitorStatus {
+  UNKNOWN
+  UP
+  DOWN
+  SLOW
+}
+
+enum CheckStatus {
+  UP
+  DOWN
+  SLOW
+}
+
+model Monitor {
+  id                 String        @id @default(uuid()) @db.Uuid
+  name               String
+  url                String
+  status             MonitorStatus @default(UNKNOWN)
+  lastStatusCode     Int?
+  lastResponseTimeMs Int?
+  lastCheckedAt      DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  checks             Check[]
+}
+
+model Check {
+  id             String      @id @default(uuid()) @db.Uuid
+  monitorId      String      @db.Uuid
+  status         CheckStatus
+  statusCode     Int?
+  responseTimeMs Int?
+  errorMessage   String?
+  checkedAt      DateTime    @default(now())
+  monitor        Monitor     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@index([monitorId, checkedAt(sort: Desc)])
+}
