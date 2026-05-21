@@ -37,7 +37,7 @@ pipeline {
                             --out \'./\'
                             --format \'ALL\'
                             --prettyPrint '''
-                            
+
                         odcInstallation: 'OWASP-DepCheck-12'
 
                         nvdCredentialsId: 'NVD-API-KEY'
