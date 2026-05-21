@@ -39,6 +39,9 @@ pipeline {
                             --prettyPrint ''', 
                         odcInstallation: 'OWASP-DepCheck-12',
                         nvdCredentialsId: 'NVD-API-KEY'
+                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
+                         reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
+                         reportTitles: '', useWrapperFileDirectly: true])
                     }
                 }
             }
