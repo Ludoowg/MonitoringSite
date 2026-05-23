@@ -17,7 +17,9 @@ pipeline {
 
         stage('Test docker BDD'){
             steps{
-                sh 'psql -version'
+                withCredentials([usernamePassword(credentialsId: 'Postgres-credentials', passwordVariable: 'PSQL_PASSWORD', usernameVariable: 'PSQL_USERNAME')]) {
+                    sh 'PGPASSWORD="$PSQL_PASSWORD" psql -h monitoring-postgres -p 5432 -U $PSQL_USERNAME -d postgres -c "SELECT current_user, current_database();"'
+                }
             }
         }
 
