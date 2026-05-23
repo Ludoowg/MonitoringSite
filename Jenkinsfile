@@ -5,6 +5,10 @@ pipeline {
         nodejs 'nodejs-25-9-0'
     }
 
+    environment {
+        PSQL_CREDENTIALS = credentials('Postgres-credentials')
+    }
+
     stages {
 
         stage('Install dependencies') {
@@ -17,9 +21,10 @@ pipeline {
 
         stage('Test docker BDD'){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'Postgres-credentials', passwordVariable: 'PSQL_PASSWORD', usernameVariable: 'PSQL_USERNAME')]) {
-                    sh 'PGPASSWORD="$PSQL_PASSWORD" psql -h monitoring-postgres -p 5432 -U $PSQL_USERNAME -d postgres -c "SELECT current_user, current_database();"'
-                }
+                sh 'echo $PSQL_CREDENTIALS'
+                sh 'echo $PSQL_CREDENTIALS_PSW'
+                sh 'echo $PSQL_CREDENTIALS_USR'
+                sh 'PGPASSWORD="$PSQL_CREDENTIALS_PSW" psql -h monitoring-postgres -p 5432 -U $PSQL_CREDENTIALS_USR -d postgres -c "SELECT current_user, current_database();"'
             }
         }
 
