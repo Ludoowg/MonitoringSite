@@ -24,7 +24,7 @@ pipeline {
                 sh 'echo $PSQL_CREDENTIALS'
                 sh 'echo $PSQL_CREDENTIALS_PSW'
                 sh 'echo $PSQL_CREDENTIALS_USR'
-                sh 'PGPASSWORD="$PSQL_CREDENTIALS_PSW" psql -h monitoring-postgres -p 5432 -U $PSQL_CREDENTIALS_USR -d postgres -c "SELECT current_user, current_database();"'
+                sh 'PGPASSWORD="$PSQL_CREDENTIALS_PSW" psql -h monitoring-postgres -p 5432 -U $PSQL_CREDENTIALS_USR -d instamailing -c "SELECT current_user, current_database();"'
             }
         }
 
