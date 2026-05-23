@@ -17,6 +17,9 @@ pipeline {
 
         stage('Test docker BDD'){
             steps{
+                sh 'docker context ls || true'
+                sh 'docker info'
+                sh 'echo $DOCKER_HOST'
                 sh 'docker ps -a'
             }
         }
