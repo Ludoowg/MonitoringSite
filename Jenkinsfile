@@ -67,7 +67,6 @@ pipeline {
                         sh 'echo $SONAR_SCANNER'
                         sh '''
                         $SONAR_SCANNER/bin/sonar-scanner \
-                        sonar-scanner \
                             -Dsonar.host.url=http://localhost:9000 \
                             -Dsonar.token=sqp_c1da75bead468303623fc0f7cd5a4ecbb211820c \
                             -Dsonar.projectKey=Monitoring-Site
