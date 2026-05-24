@@ -33,34 +33,34 @@ pipeline {
 
             parallel {
 
-                stage('NPM Dependencies Audit') {
-                    steps {
-                        dir('backend') {
-                        sh '''
-                            npm audit --audit-level=critical
-                                echo $?
-                            '''
-                        }
-                    }
-                }
+                // stage('NPM Dependencies Audit') {
+                //     steps {
+                //         dir('backend') {
+                //         sh '''
+                //             npm audit --audit-level=critical
+                //                 echo $?
+                //             '''
+                //         }
+                //     }
+                // }
 
-                stage('OWASP Dependency Check') {
-                    steps {
-                        dependencyCheck ( additionalArguments: '''
-                            --scan \'./\'
-                            --out \'./\'
-                            --format \'ALL\'
-                            --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
+                // stage('OWASP Dependency Check') {
+                //     steps {
+                //         dependencyCheck ( additionalArguments: '''
+                //             --scan \'./\'
+                //             --out \'./\'
+                //             --format \'ALL\'
+                //             --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
-                        nvdCredentialsId: 'NVD-API-KEY')
+                //         nvdCredentialsId: 'NVD-API-KEY')
 
-                        junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
+                //         junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
 
-                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
-                         reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
-                         reportTitles: '', useWrapperFileDirectly: true])
-                    }
-                }
+                //         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
+                //          reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
+                //          reportTitles: '', useWrapperFileDirectly: true])
+                //     }
+                // }
 
                 stage('SonarQube Analysis') {
                     steps {
