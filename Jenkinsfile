@@ -8,6 +8,7 @@ pipeline {
     environment {
         PSQL_CREDENTIALS = credentials('Postgres-credentials')
         SONAR_SCANNER = tool 'sonarqube-scanner-610'
+        SONAR_TOKEN = credentials('sonarqube-token')
     }
 
     stages {
@@ -68,7 +69,6 @@ pipeline {
                         sh '''
                         $SONAR_SCANNER/bin/sonar-scanner \
                             -Dsonar.host.url=http://sonarqube:9000 \
-                            -Dsonar.token=sqp_c1da75bead468303623fc0f7cd5a4ecbb211820c \
                             -Dsonar.projectKey=Monitoring-Site \
                             -X
                         '''
