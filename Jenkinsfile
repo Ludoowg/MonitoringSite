@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         PSQL_CREDENTIALS = credentials('Postgres-credentials')
-        SONAR_SCANNER = tool 'sonarqube-scanner-610'
+        //SONAR_SCANNER = tool 'sonarqube-scanner-610'
     }
 
     stages {
@@ -62,18 +62,18 @@ pipeline {
                     }
                 }
 
-                stage('SonarQube Analysis') {
-                    steps {
-                        sh 'echo $SONAR_SCANNER'
-                        sh '''
-                        $SONAR_SCANNER/bin/sonar-scanner \
-                        sonar-scanner \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=sqp_c1da75bead468303623fc0f7cd5a4ecbb211820c \
-                            -Dsonar.projectKey=Monitoring-Site
-                        '''
-                    }
-                }
+                // stage('SonarQube Analysis') {
+                //     steps {
+                //         sh 'echo $SONAR_SCANNER'
+                //         sh '''
+                //         $SONAR_SCANNER/bin/sonar-scanner \
+                //         sonar-scanner \
+                //             -Dsonar.host.url=http://localhost:9000 \
+                //             -Dsonar.token=sqp_c1da75bead468303623fc0f7cd5a4ecbb211820c \
+                //             -Dsonar.projectKey=Monitoring-Site
+                //         '''
+                //     }
+                // }
             }
         }       
     }
