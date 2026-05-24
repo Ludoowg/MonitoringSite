@@ -69,7 +69,8 @@ pipeline {
                         $SONAR_SCANNER/bin/sonar-scanner \
                             -Dsonar.host.url=http://localhost:9000 \
                             -Dsonar.token=sqp_c1da75bead468303623fc0f7cd5a4ecbb211820c \
-                            -Dsonar.projectKey=Monitoring-Site
+                            -Dsonar.projectKey=Monitoring-Site \
+                            -X
                         '''
                     }
                 }
