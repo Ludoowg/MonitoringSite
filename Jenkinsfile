@@ -30,6 +30,14 @@ pipeline {
             }
         }
 
+        stage('Test backend') {
+            steps {
+                dir('backend') {
+                    sh 'npm run test:coverage'
+                }
+            }
+        }
+
         stage('Dependency Scanning') {
 
             parallel {
@@ -70,8 +78,9 @@ pipeline {
                         $SONAR_SCANNER/bin/sonar-scanner \
                             -Dsonar.host.url=http://sonarqube:9000 \
                             -Dsonar.token=$SONAR_TOKEN \
-                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/coverage/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
                             -Dsonar.projectKey=Monitoring-Site \
+                            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
                             -X
                         '''
                     }
@@ -80,3 +89,5 @@ pipeline {
         }       
     }
 }
+
+
