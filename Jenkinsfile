@@ -73,15 +73,16 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        withSonarQubeEnv('sonarqube-server') { 
-                        sh 'echo $SONAR_SCANNER'
-                        sh '''
-                        $SONAR_SCANNER/bin/sonar-scanner \
-                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                            -Dsonar.projectKey=Monitoring-Site \
-                            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-                            -X
-                        '''
+                        withSonarQubeEnv('sonarqube-server') {
+                            sh 'echo $SONAR_SCANNER'
+                            sh '''
+                            $SONAR_SCANNER/bin/sonar-scanner \
+                                -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                -Dsonar.projectKey=Monitoring-Site \
+                                -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                                -X
+                            '''
+                        }
                     }
                 }
             }
