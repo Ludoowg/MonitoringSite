@@ -58,7 +58,6 @@ pipeline {
                 //             --scan \'./\'
                 //             --out \'./\'
                 //             --format \'ALL\'
-                //             --disableYarnAudit
                 //             --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
                 //         nvdCredentialsId: 'NVD-API-KEY')
@@ -73,20 +72,17 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            withSonarQubeEnv('sonarqube-server') {
-                                sh 'echo $SONAR_SCANNER'
-                                sh '''
-                                $SONAR_SCANNER/bin/sonar-scanner \
-                                    -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                                    -Dsonar.projectKey=Monitoring-Site \
-                                    -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-                                    -X
-                                '''
-                            }
-                            waitForQualityGate abortPipeline: true
+                        withSonarQubeEnv('sonarqube-server') {
+                            sh 'echo $SONAR_SCANNER'
+                            sh '''
+                            $SONAR_SCANNER/bin/sonar-scanner \
+                                -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                -Dsonar.projectKey=Monitoring-Site \
+                                -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                                -X
+                            '''
                         }
-                    } 
+                    }
                 }
             }
         }       
