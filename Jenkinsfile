@@ -58,6 +58,7 @@ pipeline {
                 //             --scan \'./\'
                 //             --out \'./\'
                 //             --format \'ALL\'
+                //             --disableYarnAudit
                 //             --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
                 //         nvdCredentialsId: 'NVD-API-KEY')
@@ -72,7 +73,7 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        timeout(time: 60, unit: 'SECONDS') {
+                        timeout(time: 5, unit: 'MINUTES') {
                             withSonarQubeEnv('sonarqube-server') {
                                 sh 'echo $SONAR_SCANNER'
                                 sh '''
