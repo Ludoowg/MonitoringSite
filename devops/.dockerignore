@@ -1,0 +1,15 @@
+npm-debug.log
+
+.git
+.cache
+
+*.md
+!README*.md
+.github/
+node_modules
+coverage
+.env
+.gitignore
+Dockerfile
+Dockerfile.jenkins
+Jenkinsfilee

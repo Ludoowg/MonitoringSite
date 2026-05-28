@@ -2,8 +2,13 @@ const app = require("./app");
 const env = require("./config/env");
 const prisma = require("./config/prisma");
 
-const server = app.listen(env.PORT, () => {
-  console.log(`Server listening on http://localhost:${env.PORT}`);
+const dotenv = require("dotenv");
+dotenv.config();
+
+const PORT = env.PORT || 5050;
+
+const server = app.listen(PORT, () => {
+  console.log(`Server listening on http://localhost:${PORT}`);
 });
 
 const shutdown = async () => {
