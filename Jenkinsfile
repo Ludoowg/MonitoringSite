@@ -97,7 +97,7 @@ pipeline {
 
         stage('Build docker image'){
             steps{
-                sh 'docker build -f Dockerfile ludovic/monitoring-site:$GIT_COMMIT .'
+                sh 'docker build -f Dockerfile -t ludovic/monitoring-site:$GIT_COMMIT .'
             }
         }       
     }
