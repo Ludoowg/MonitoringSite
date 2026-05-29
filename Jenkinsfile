@@ -73,19 +73,22 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            withSonarQubeEnv('sonarqube-server') {
-                                sh 'echo $SONAR_SCANNER'
-                                sh '''
-                                $SONAR_SCANNER/bin/sonar-scanner \
-                                    -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                                    -Dsonar.projectKey=Monitoring-Site \
-                                    -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-                                    -X
-                                '''
+                        catchError(buildResult: 'UNSTABLE', message: 'Oops') {
+                            timeout(time: 5, unit: 'MINUTES') {
+                                    withSonarQubeEnv('sonarqube-server') {
+                                        sh 'echo $SONAR_SCANNER'
+                                        sh '''
+                                        $SONAR_SCANNER/bin/sonar-scanner \
+                                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                            -Dsonar.projectKey=Monitoring-Site \
+                                            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                                            -X
+                                        '''
+                                    }
+                                    waitForQualityGate abortPipeline: true
                             }
-                            waitForQualityGate abortPipeline: true
                         }
+                        
                     } 
                 }
 
@@ -94,10 +97,11 @@ pipeline {
 
         stage('Build docker image'){
             steps{
-                sh 'docker build -f Dockerfile-t ludovic/monitoring-site:$GIT_COMMIT .'
+                sh 'docker build -f Dockerfile ludovic/monitoring-site:$GIT_COMMIT .'
             }
         }       
     }
 }
 
 
+METTRE LE SONARQUBE DANS LE CATCH ERROR ET TESTER LE DOCKER IMAGE DANS JENKINS
