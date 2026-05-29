@@ -73,7 +73,7 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', message: 'Oops') {
+                        catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
                             timeout(time: 5, unit: 'MINUTES') {
                                     withSonarQubeEnv('sonarqube-server') {
                                         sh 'echo $SONAR_SCANNER'
