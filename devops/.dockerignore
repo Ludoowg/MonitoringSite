@@ -12,4 +12,4 @@ coverage
 .gitignore
 Dockerfile
 Dockerfile.jenkins
-Jenkinsfilee
+Jenkinsfile
