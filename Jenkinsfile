@@ -113,15 +113,12 @@ pipeline {
                 sh 'docker images'
                 sh 'docker rm -f trivy'
                 sh '''
-                    docker run \
+                    docker run --rm \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
                     --name trivy \
-                    --network jenkins \
-                    -p 6000:6000 \
                     aquasec/trivy:latest \
                     image ludovic/monitoring-site:$GIT_COMMIT 
                 '''
-                sh 'docker logs trivy'
-                sh 'docker rm -f trivy'
             }
         }
 
