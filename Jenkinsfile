@@ -111,16 +111,16 @@ pipeline {
         stage('Trivy scanning'){       
             steps{
                 sh 'docker images'
-                // sh '''
-                //     docker run \
-                //     --name trivy \
-                //     --network jenkins \
-                //     -p 6000:6000 \
-                //     aquasec/trivy:latest \
-                //     image ludovic/monitoring-site:$GIT_COMMIT 
-                // '''
-                // sh 'docker logs trivy'
-                // sh 'docker rm -f trivy'
+                sh '''
+                    docker run \
+                    --name trivy \
+                    --network jenkins \
+                    -p 6000:6000 \
+                    aquasec/trivy:latest \
+                    image ludovic/monitoring-site:$GIT_COMMIT 
+                '''
+                sh 'docker logs trivy'
+                sh 'docker rm -f trivy'
             }
         }
 
