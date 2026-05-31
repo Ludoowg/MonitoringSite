@@ -111,6 +111,7 @@ pipeline {
         stage('Trivy scanning'){       
             steps{
                 sh 'docker images'
+                sh 'docker rm -f trivy'
                 sh '''
                     docker run \
                     --name trivy \
