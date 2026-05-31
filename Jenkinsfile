@@ -110,14 +110,26 @@ pipeline {
 
         stage('Trivy scanning'){       
             steps{
-                sh 'docker images'
-                sh 'docker rm -f trivy'
                 sh '''
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
                     --name trivy \
                     aquasec/trivy:latest \
-                    image ludovic/monitoring-site:$GIT_COMMIT 
+                    image ludovic/monitoring-site:$GIT_COMMIT \
+                    --severity LOW,MEDIUM \
+                    --exit-code 0
+                    --quiet \
+                    --format json -o trivy-image-MEDIUM-results.json
+
+                    docker run --rm \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    --name trivy \
+                    aquasec/trivy:latest \
+                    image ludovic/monitoring-site:$GIT_COMMIT \
+                    --severity HIGH, CRITICAL \
+                    --exit-code 1
+                    --quiet \
+                    --format json -o trivy-image-CRITICAL-results.json
                 '''
             }
         }
