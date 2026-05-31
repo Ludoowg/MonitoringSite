@@ -101,7 +101,7 @@ pipeline {
             }
         }
 
-        stage('Trivy scanning')       
+        stage('Trivy scanning'){       
             steps{
                 sh '''
                     docker run \
