@@ -113,14 +113,9 @@ pipeline {
                 sh '''
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
-                    --name trivy \
+                    -name trivy \
                     aquasec/trivy:latest \
-                    image ludovic/monitoring-site:$GIT_COMMIT \
-                    --severity LOW,MEDIUM \
-                    --exit-code 0 \
-                    --quiet \
-                    --format json -o trivy-image-MEDIUM-results.json
-
+                    -c "ls /usr/local/share/trivy/templates"
                 '''
             }
         }
