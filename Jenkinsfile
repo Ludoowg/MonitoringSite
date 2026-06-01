@@ -116,7 +116,7 @@ pipeline {
                     -v "$WORKSPACE:/trivy-results" \
                     --name trivy \
                     aquasec/trivy:latest \
-                    image ludovic/monitoring-site:$GIT_COMMIT \
+                    image ludoowg/monitoring-site:$GIT_COMMIT \
                     --severity LOW,MEDIUM \
                     --exit-code 0 \
                     --format json -o /trivy-results/trivy-image-MEDIUM-results.json
