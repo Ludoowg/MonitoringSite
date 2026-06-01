@@ -117,7 +117,8 @@ pipeline {
                     aquasec/trivy:latest \
                     image ludovic/monitoring-site:$GIT_COMMIT \
                     --severity LOW,MEDIUM \
-                    --exit-code 0
+                    --exit-code 0 \
+                    --quiet \
                     --format json -o trivy-image-MEDIUM-results.json
 
                 '''
