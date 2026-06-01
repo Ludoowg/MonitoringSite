@@ -97,7 +97,7 @@ pipeline {
 
         stage('Build docker image'){
             steps{
-                sh 'docker build -f Dockerfile -t ludovic/monitoring-site:$GIT_COMMIT .'
+                sh 'docker build -f Dockerfile -t ludoowg/monitoring-site:$GIT_COMMIT .'
             }
         }
 
@@ -127,7 +127,7 @@ pipeline {
         stage('Push Docker Image'){
             steps{
                     withDockerRegistry(credentialsId: '1b517279-c3c9-4cfe-baf4-f51a2d9dbeca', url: '') {
-                    sh 'docker push ludovic/monitoring-site:$GIT_COMMIT'
+                    sh 'docker push ludoowg/monitoring-site:$GIT_COMMIT'
                 }
             }
         }
