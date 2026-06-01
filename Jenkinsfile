@@ -113,12 +113,13 @@ pipeline {
                 sh '''
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v "$WORKSPACE:/trivy-results" \
                     --name trivy \
                     aquasec/trivy:latest \
                     image ludovic/monitoring-site:$GIT_COMMIT \
                     --severity LOW,MEDIUM \
                     --exit-code 0 \
-                    --format json -o trivy-image-MEDIUM-results.json
+                    --format json -o /trivy-results/trivy-image-MEDIUM-results.json
                 '''
             }
         }
