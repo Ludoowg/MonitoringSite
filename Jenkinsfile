@@ -118,7 +118,7 @@ pipeline {
                     image ludovic/monitoring-site:$GIT_COMMIT \
                     --severity LOW,MEDIUM \
                     --exit-code 0 \
-                    --format json -o trivy-image-MEDIUM-results.json"
+                    --format json -o trivy-image-MEDIUM-results.json
                 '''
             }
         }
