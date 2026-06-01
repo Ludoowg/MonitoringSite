@@ -114,6 +114,7 @@ pipeline {
                     docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
                     --name trivy \
+                    --entrypoint sh \
                     aquasec/trivy:latest \
                     -c "trivy -v && ls /usr/local/share/trivy/templates"
                 '''
