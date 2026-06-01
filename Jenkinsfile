@@ -126,7 +126,7 @@ pipeline {
 
         stage('Push Docker Image'){
             steps{
-                    withDockerRegistry(credentialsId: '1b517279-c3c9-4cfe-baf4-f51a2d9dbeca', url: 'https://hub.docker.com/r/ludoowg/normanrepo') {
+                    withDockerRegistry(credentialsId: '1b517279-c3c9-4cfe-baf4-f51a2d9dbeca', url: '') {
                     sh 'docker push ludovic/monitoring-site:$GIT_COMMIT'
                 }
             }
