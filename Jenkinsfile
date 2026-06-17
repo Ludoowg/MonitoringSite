@@ -8,6 +8,7 @@ pipeline {
     environment {
         PSQL_CREDENTIALS = credentials('Postgres-credentials')
         SONAR_SCANNER = tool 'sonarqube-scanner-610'
+        DATABASE_URL = credentials('DATABASE_URL')
     }
 
     stages {
@@ -40,6 +41,7 @@ pipeline {
                 stage('Test backend') {
                     steps {
                         dir('backend') {
+                            DATABASE_URL
                             sh 'npm run test:coverage'
                             sh 'npx prisma validate'
                         }
