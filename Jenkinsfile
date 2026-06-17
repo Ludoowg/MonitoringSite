@@ -143,33 +143,33 @@ pipeline {
             }
         }
 
-        stage('OWASP Dependency Check') {
+        // stage('Sonarqube') {
 
-            parallel {
+        //     parallel {
 
-                // stage('SonarQube Analysis') {
-                //     steps {
-                //         catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-                //             timeout(time: 5, unit: 'MINUTES') {
-                //                     withSonarQubeEnv('sonarqube-server') {
-                //                         sh 'echo $SONAR_SCANNER'
-                //                         sh '''
-                //                         $SONAR_SCANNER/bin/sonar-scanner \
-                //                             -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                //                             -Dsonar.projectKey=Monitoring-Site \
-                //                             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-                //                             -X
-                //                         '''
-                //                     }
-                //                     waitForQualityGate abortPipeline: true
-                //             }
-                //         }
+        //         stage('SonarQube Analysis') {
+        //             steps {
+        //                 catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+        //                     timeout(time: 5, unit: 'MINUTES') {
+        //                             withSonarQubeEnv('sonarqube-server') {
+        //                                 sh 'echo $SONAR_SCANNER'
+        //                                 sh '''
+        //                                 $SONAR_SCANNER/bin/sonar-scanner \
+        //                                     -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+        //                                     -Dsonar.projectKey=Monitoring-Site \
+        //                                     -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+        //                                     -X
+        //                                 '''
+        //                             }
+        //                             waitForQualityGate abortPipeline: true
+        //                     }
+        //                 }
                         
-                //     } 
-                // }
+        //             } 
+        //         }
 
-            }
-        }
+        //     }
+        // }
 
         // stage('Build docker image'){
         //     steps{
