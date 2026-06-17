@@ -8,7 +8,6 @@ pipeline {
     environment {
         PSQL_CREDENTIALS = credentials('Postgres-credentials')
         SONAR_SCANNER = tool 'sonarqube-scanner-610'
-        DATABASE_URL = credentials('DATABASE_URL')
     }
 
     stages {
