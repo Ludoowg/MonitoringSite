@@ -41,7 +41,6 @@ pipeline {
                 stage('Test backend') {
                     steps {
                         dir('backend') {
-                            DATABASE_URL
                             sh 'npm run test:coverage'
                             sh 'npx prisma validate'
                         }
