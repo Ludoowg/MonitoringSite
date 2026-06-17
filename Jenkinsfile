@@ -97,53 +97,72 @@ pipeline {
 
 
 
-        // stage('Dependency Scanning') {
+        stage('OWASP Dependency Check') {
 
-        //     parallel {
+            parallel {
 
 
-        //         stage('OWASP Dependency Check') {
-        //             steps {
-        //                 dependencyCheck ( additionalArguments: '''
-        //                     --scan \'./\'
-        //                     --out \'./\'
-        //                     --format \'ALL\'
-        //                     --disableYarnAudit
-        //                     --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
+                stage('OWASP Dependency Check backend') {
+                    steps {
+                        dependencyCheck ( additionalArguments: '''
+                            --scan \'./backend\'
+                            --out \'./\'
+                            --format \'ALL\'
+                            --disableYarnAudit
+                            --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
-        //                 nvdCredentialsId: 'NVD-API-KEY')
+                        nvdCredentialsId: 'NVD-API-KEY')
 
-        //                 junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
+                        junit allowEmptyResults: true, testResults: 'dependency-check-junit-backend.xml'
 
-        //                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
-        //                  reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
-        //                  reportTitles: '', useWrapperFileDirectly: true])
-        //             }
-        //         }
+                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
+                         reportFiles: 'dependency-check-report-backend.html', reportName: 'Dependency Check Report Backend', 
+                         reportTitles: '', useWrapperFileDirectly: true])
+                    }
+                }
 
-        //         stage('SonarQube Analysis') {
-        //             steps {
-        //                 catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-        //                     timeout(time: 5, unit: 'MINUTES') {
-        //                             withSonarQubeEnv('sonarqube-server') {
-        //                                 sh 'echo $SONAR_SCANNER'
-        //                                 sh '''
-        //                                 $SONAR_SCANNER/bin/sonar-scanner \
-        //                                     -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-        //                                     -Dsonar.projectKey=Monitoring-Site \
-        //                                     -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-        //                                     -X
-        //                                 '''
-        //                             }
-        //                             waitForQualityGate abortPipeline: true
-        //                     }
-        //                 }
+                stage('OWASP Dependency Check frontend') {
+                    steps {
+                        dependencyCheck ( additionalArguments: '''
+                            --scan \'./frontend\'
+                            --out \'./\'
+                            --format \'ALL\'
+                            --disableYarnAudit
+                            --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
+
+                        nvdCredentialsId: 'NVD-API-KEY')
+
+                        junit allowEmptyResults: true, testResults: 'dependency-check-junit-frontend.xml'
+
+                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
+                         reportFiles: 'dependency-check-report-frontend.html', reportName: 'Dependency Check Report Frontend', 
+                         reportTitles: '', useWrapperFileDirectly: true])
+                    }
+                }
+
+                // stage('SonarQube Analysis') {
+                //     steps {
+                //         catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                //             timeout(time: 5, unit: 'MINUTES') {
+                //                     withSonarQubeEnv('sonarqube-server') {
+                //                         sh 'echo $SONAR_SCANNER'
+                //                         sh '''
+                //                         $SONAR_SCANNER/bin/sonar-scanner \
+                //                             -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                //                             -Dsonar.projectKey=Monitoring-Site \
+                //                             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                //                             -X
+                //                         '''
+                //                     }
+                //                     waitForQualityGate abortPipeline: true
+                //             }
+                //         }
                         
-        //             } 
-        //         }
+                //     } 
+                // }
 
-        //     }
-        // }
+            }
+        }
 
         // stage('Build docker image'){
         //     steps{
