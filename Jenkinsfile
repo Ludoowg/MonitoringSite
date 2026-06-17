@@ -106,17 +106,17 @@ pipeline {
                     steps {
                         dependencyCheck ( additionalArguments: '''
                             --scan \'./backend\'
-                            --out \'./\'
+                            --out \'./owasp-report/frontend\'
                             --format \'ALL\'
                             --disableYarnAudit
                             --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
                         nvdCredentialsId: 'NVD-API-KEY')
 
-                        junit allowEmptyResults: true, testResults: 'dependency-check-junit-backend.xml'
+                        junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
 
                         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
-                         reportFiles: 'dependency-check-report-backend.html', reportName: 'Dependency Check Report Backend', 
+                         reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
                          reportTitles: '', useWrapperFileDirectly: true])
                     }
                 }
@@ -125,20 +125,27 @@ pipeline {
                     steps {
                         dependencyCheck ( additionalArguments: '''
                             --scan \'./frontend\'
-                            --out \'./\'
+                            --out \'./owasp-report/backend\'
                             --format \'ALL\'
                             --disableYarnAudit
                             --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
 
                         nvdCredentialsId: 'NVD-API-KEY')
 
-                        junit allowEmptyResults: true, testResults: 'dependency-check-junit-frontend.xml'
+                        junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
 
                         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
-                         reportFiles: 'dependency-check-report-frontend.html', reportName: 'Dependency Check Report Frontend', 
+                         reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
                          reportTitles: '', useWrapperFileDirectly: true])
                     }
                 }
+
+            }
+        }
+
+        stage('OWASP Dependency Check') {
+
+            parallel {
 
                 // stage('SonarQube Analysis') {
                 //     steps {
