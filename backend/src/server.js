@@ -5,7 +5,7 @@ const prisma = require("./config/prisma");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const PORT = env.PORT || 5050;
+const PORT = env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
