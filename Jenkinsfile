@@ -70,7 +70,7 @@ pipeline {
                     }
                 }
 
-                stage('NPM Dependencies Audit backend') {
+                stage('NPM Dependencies Audit frontend') {
                     steps {
                         dir('frontend') {
                             catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
