@@ -104,6 +104,9 @@ pipeline {
 
                 stage('OWASP Dependency Check backend') {
                     steps {
+
+                        sh 'rm -rf ./owasp-report/backend && mkdir -p owasp-report/backend'
+
                         dependencyCheck ( additionalArguments: '''
                             --scan \'./backend\'
                             --out \'./owasp-report/frontend\'
@@ -123,6 +126,9 @@ pipeline {
 
                 stage('OWASP Dependency Check frontend') {
                     steps {
+
+                        sh 'rm -rf ./owasp-report/backend && mkdir -p ./owasp-report/backend'
+
                         dependencyCheck ( additionalArguments: '''
                             --scan \'./frontend\'
                             --out \'./owasp-report/backend\'
