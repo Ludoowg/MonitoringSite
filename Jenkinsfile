@@ -112,15 +112,17 @@ pipeline {
                             --out \'./owasp-report/backend\'
                             --format \'ALL\'
                             --disableYarnAudit
-                            --prettyPrint ''', odcInstallation: 'OWASP-DepCheck-12',
+                            --prettyPrint 
+                            --noupdate
+                            ''', odcInstallation: 'OWASP-DepCheck-12',
 
                         nvdCredentialsId: 'NVD-API-KEY')
 
-                        junit allowEmptyResults: false, testResults: 'owasp-report/backend/dependency-check-junit.xml'
+                        // junit allowEmptyResults: false, testResults: 'owasp-report/backend/dependency-check-junit.xml'
 
-                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report/backend',
-                         reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
-                         reportTitles: '', useWrapperFileDirectly: true])
+                        // publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report/backend',
+                        //  reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
+                        //  reportTitles: '', useWrapperFileDirectly: true])
                     }
                 }
 
