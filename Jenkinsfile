@@ -116,9 +116,9 @@ pipeline {
 
                         nvdCredentialsId: 'NVD-API-KEY')
 
-                        junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
+                        junit allowEmptyResults: false, testResults: 'owasp-report/backend/dependency-check-junit.xml'
 
-                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './',
+                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report/backend',
                          reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
                          reportTitles: '', useWrapperFileDirectly: true])
                     }
