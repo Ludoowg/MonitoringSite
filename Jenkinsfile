@@ -212,4 +212,3 @@ pipeline {
 }
 
 
-CONTINUER A PARTIE DE SONARQUBE
