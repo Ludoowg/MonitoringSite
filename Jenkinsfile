@@ -86,70 +86,59 @@ pipeline {
         }
 
 
-        // stage('Test docker BDD'){
-        //     steps{
-        //         sh 'echo $PSQL_CREDENTIALS'
-        //         sh 'echo $PSQL_CREDENTIALS_PSW'
-        //         sh 'echo $PSQL_CREDENTIALS_USR'
-        //         sh 'PGPASSWORD="$PSQL_CREDENTIALS_PSW" psql -h monitoring-postgres -p 5432 -U $PSQL_CREDENTIALS_USR -d instamailing -c "SELECT current_user, current_database();"'
+        // stage('OWASP Dependency Check') {
+
+        //     steps {
+
+        //         sh 'rm -rf ./owasp-report/ && mkdir -p owasp-report/'
+
+        //         dependencyCheck ( additionalArguments: '''
+        //             --scan \'./backend\'
+        //             --scan \'./frontend\'
+        //             --out \'./owasp-report/\'
+        //             --format \'ALL\'
+        //             --disableYarnAudit
+        //             --prettyPrint 
+        //             --noupdate
+        //             ''', odcInstallation: 'OWASP-DepCheck-12',
+
+        //         nvdCredentialsId: 'NVD-API-KEY')
+
+        //         junit allowEmptyResults: true, testResults: 'owasp-report/dependency-check-junit.xml'
+
+        //         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report',
+        //          reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
+        //          reportTitles: '', useWrapperFileDirectly: true])
         //     }
         // }
 
+        stage('Sonarqube') {
 
 
-        stage('OWASP Dependency Check') {
 
-            steps {
-
-                sh 'rm -rf ./owasp-report/ && mkdir -p owasp-report/'
-
-                dependencyCheck ( additionalArguments: '''
-                    --scan \'./backend\'
-                    --scan \'./frontend\'
-                    --out \'./owasp-report/\'
-                    --format \'ALL\'
-                    --disableYarnAudit
-                    --prettyPrint 
-                    --noupdate
-                    ''', odcInstallation: 'OWASP-DepCheck-12',
-
-                nvdCredentialsId: 'NVD-API-KEY')
-
-                junit allowEmptyResults: true, testResults: 'owasp-report/dependency-check-junit.xml'
-
-                publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report',
-                 reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
-                 reportTitles: '', useWrapperFileDirectly: true])
-            }
-        }
-
-        // stage('Sonarqube') {
-
-        //     parallel {
-
-        //         stage('SonarQube Analysis') {
-        //             steps {
-        //                 catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-        //                     timeout(time: 5, unit: 'MINUTES') {
-        //                             withSonarQubeEnv('sonarqube-server') {
-        //                                 sh 'echo $SONAR_SCANNER'
-        //                                 sh '''
-        //                                 $SONAR_SCANNER/bin/sonar-scanner \
-        //                                     -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-        //                                     -Dsonar.projectKey=Monitoring-Site \
-        //                                     -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-        //                                     -X
-        //                                 '''
-        //                             }
-        //                             waitForQualityGate abortPipeline: true
-        //                     }
-        //                 }
+                stage('SonarQube Analysis') {
+                    steps {
+                        catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                            timeout(time: 5, unit: 'MINUTES') {
+                                    withSonarQubeEnv('sonarqube-server') {
+                                        sh 'echo $SONAR_SCANNER'
+                                        sh '''
+                                        $SONAR_SCANNER/bin/sonar-scanner \
+                                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                            -Dsonar.projectKey=Monitoring-Site \
+                                            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                                            -X
+                                        '''
+                                    }
+                                    waitForQualityGate abortPipeline: true
+                            }
+                        }
                         
-        //             } 
-        //         }
+                    } 
+                }
 
-        //     }
-        // }
+
+        }
 
         // stage('Build docker image'){
         //     steps{
