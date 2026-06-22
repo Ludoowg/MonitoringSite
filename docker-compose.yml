@@ -27,6 +27,7 @@ services:
     networks:
       - monitoring-network
 
+
   postgres:
     image: postgres
     environment: 
@@ -40,6 +41,7 @@ services:
     networks:
       - monitoring-network
 
+
   nginx:
     image: nginx:alpine
     ports:
@@ -51,6 +53,8 @@ services:
       - frontend
     networks:
       - monitoring-network
+
+
 
 volumes:
   postgres-data:

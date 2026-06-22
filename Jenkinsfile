@@ -50,6 +50,7 @@ pipeline {
                 stage('Test frontend') {
                     steps {
                         dir('frontend') {
+                            sh 'npm run test:coverage'
                             sh 'npm run build'
                         }
                     }
@@ -126,7 +127,7 @@ pipeline {
                                 $SONAR_SCANNER/bin/sonar-scanner \
                                     -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
                                     -Dsonar.projectKey=Monitoring-Site \
-                                    -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                                    -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info \
                                     -X
                                 '''
                             }
