@@ -244,6 +244,8 @@ pipeline {
                                 --exit-code 0 \
                                 --format json -o /results/trivy-backend-results.json
                             '''
+
+                            archiveArtifacts artifacts: 'trivy-results/trivy-backend-results.json', allowEmptyArchive: true
                         }
                 }
 
@@ -274,6 +276,8 @@ pipeline {
                                 --exit-code 0 \
                                 --format json -o /results/trivy-frontend-results.json
                             '''
+
+                            archiveArtifacts artifacts: 'trivy-results/trivy-frontend-results.json', allowEmptyArchive: true
                         }
                 }
     
@@ -281,13 +285,19 @@ pipeline {
             
         }
 
-        // stage('Push Docker Image'){
-        //     steps{
-        //             withDockerRegistry(credentialsId: '1b517279-c3c9-4cfe-baf4-f51a2d9dbeca', url: '') {
-        //             sh 'docker push ludoowg/monitoring-site:$GIT_COMMIT'
-        //         }
-        //     }
-        // }
+        stage('Push Docker Image'){
+            steps{
+                    withDockerRegistry(credentialsId: 'docker-repo', url: '') {
+                    sh '''
+                        docker push ludoowg/monitoring-site-backend:$GIT_COMMIT
+                        docker push ludoowg/monitoring-site-backend:latest
+
+                        docker push ludoowg/monitoring-site-frontend:$GIT_COMMIT
+                        docker push ludoowg/monitoring-site-frontend:latest
+                    '''
+                }
+            }
+        }
 
     }
 }
