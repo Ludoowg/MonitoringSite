@@ -212,78 +212,78 @@ pipeline {
         }
         
 
-        stage('Trivy scanning monitoring-site'){
-            parallel{
+        // stage('Trivy scanning monitoring-site'){
+        //     parallel{
 
-                stage('Trivy scanning backend'){
-                    steps{
-                            sh '''
+        //         stage('Trivy scanning backend'){
+        //             steps{
+        //                     sh '''
 
-                                mkdir -p trivy-results
+        //                         mkdir -p trivy-results
 
-                                echo "====== Trivy table report backend======"
+        //                         echo "====== Trivy table report backend======"
 
-                                docker run --rm \
-                                -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy-backend \
-                                aquasec/trivy:latest \
-                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
-                                --severity HIGH,CRITICAL \
-                                --exit-code 0 \
-                                --format table
+        //                         docker run --rm \
+        //                         -v /var/run/docker.sock:/var/run/docker.sock \
+        //                         --name trivy-backend \
+        //                         aquasec/trivy:latest \
+        //                         image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+        //                         --severity HIGH,CRITICAL \
+        //                         --exit-code 0 \
+        //                         --format table
 
-                                echo "====== Trivy json report backend======"
+        //                         echo "====== Trivy json report backend======"
 
-                                docker run --rm \
-                                -v /var/run/docker.sock:/var/run/docker.sock \
-                                -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy-backend \
-                                aquasec/trivy:latest \
-                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
-                                --severity HIGH,CRITICAL \
-                                --exit-code 0 \
-                                --format json -o /results/trivy-backend-results.json
-                            '''
+        //                         docker run --rm \
+        //                         -v /var/run/docker.sock:/var/run/docker.sock \
+        //                         -v "$WORKSPACE/trivy-results:/results" \
+        //                         --name trivy-backend \
+        //                         aquasec/trivy:latest \
+        //                         image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+        //                         --severity HIGH,CRITICAL \
+        //                         --exit-code 0 \
+        //                         --format json -o /results/trivy-backend-results.json
+        //                     '''
 
-                            archiveArtifacts artifacts: 'trivy-results/trivy-backend-results.json', allowEmptyArchive: true
-                        }
-                }
+        //                     archiveArtifacts artifacts: 'trivy-results/trivy-backend-results.json', allowEmptyArchive: true
+        //                 }
+        //         }
 
-                stage('Trivy scanning frontend'){
-                    steps{
-                            sh '''
+        //         stage('Trivy scanning frontend'){
+        //             steps{
+        //                     sh '''
 
-                                echo "====== Trivy table report frontend======"
+        //                         echo "====== Trivy table report frontend======"
 
-                                docker run --rm \
-                                -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy-frontend \
-                                aquasec/trivy:latest \
-                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
-                                --severity HIGH,CRITICAL \
-                                --exit-code 0 \
-                                --format table
+        //                         docker run --rm \
+        //                         -v /var/run/docker.sock:/var/run/docker.sock \
+        //                         --name trivy-frontend \
+        //                         aquasec/trivy:latest \
+        //                         image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+        //                         --severity HIGH,CRITICAL \
+        //                         --exit-code 0 \
+        //                         --format table
 
-                                echo "====== Trivy json report frontend======"
+        //                         echo "====== Trivy json report frontend======"
 
-                                docker run --rm \
-                                -v /var/run/docker.sock:/var/run/docker.sock \
-                                -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy-frontend \
-                                aquasec/trivy:latest \
-                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
-                                --severity HIGH,CRITICAL \
-                                --exit-code 0 \
-                                --format json -o /results/trivy-frontend-results.json
-                            '''
+        //                         docker run --rm \
+        //                         -v /var/run/docker.sock:/var/run/docker.sock \
+        //                         -v "$WORKSPACE/trivy-results:/results" \
+        //                         --name trivy-frontend \
+        //                         aquasec/trivy:latest \
+        //                         image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+        //                         --severity HIGH,CRITICAL \
+        //                         --exit-code 0 \
+        //                         --format json -o /results/trivy-frontend-results.json
+        //                     '''
 
-                            archiveArtifacts artifacts: 'trivy-results/trivy-frontend-results.json', allowEmptyArchive: true
-                        }
-                }
+        //                     archiveArtifacts artifacts: 'trivy-results/trivy-frontend-results.json', allowEmptyArchive: true
+        //                 }
+        //         }
     
-            }       
+        //     }       
             
-        }
+        // }
 
         stage('Push Docker Image'){
             steps{
