@@ -134,7 +134,7 @@ pipeline {
                                     '''
                                 }                              
                             }
-
+                        waitForQualityGate abortPipeline: true
                     }
                 }
                 
