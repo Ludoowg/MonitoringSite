@@ -135,6 +135,8 @@ pipeline {
                                             -Dsonar.projectKey=Monitoringsite-backend \
                                             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                             -X
+                                        echo "====== Sonar report task ======="
+                                        cat .scannerwork/report-task.txt || true
                                     '''
                                 }                              
                             }
