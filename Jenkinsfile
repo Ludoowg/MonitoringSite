@@ -126,10 +126,11 @@ pipeline {
 
                 stage('SonarQube Analysis Backend') {
                     steps {
+                        dir('backend'){
                         catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
                             timeout(time: 5, unit: 'MINUTES') {
                                     withSonarQubeEnv('sonarqube-server') {
-                                        dir('backend'){
+                                      
                                             sh '''
                                                 $SONAR_SCANNER/bin/sonar-scanner \
                                                     -Dsonar.sources=src \
@@ -141,12 +142,12 @@ pipeline {
                                                 echo "====== Sonar report task ======="
                                                 cat .scannerwork/report-task.txt || true
                                             '''
-                                        }                              
+                                                                      
                                     }
                                 waitForQualityGate abortPipeline: true
                             }
                         }
-                        
+                        }
                     } 
                 }
 
