@@ -114,7 +114,10 @@ pipeline {
         // }
 
    
-
+        stage('Debug Jenkinsfile Version') {
+            steps {
+                sh 'echo "VERSION JENKINSFILE TEST 123"'
+            }
 
 
         stage('SonarQube Analysis') {
