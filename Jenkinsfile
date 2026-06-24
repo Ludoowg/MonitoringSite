@@ -225,7 +225,7 @@ pipeline {
 
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy \
+                                --name trivy-backend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-backend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -237,7 +237,7 @@ pipeline {
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy \
+                                --name trivy-backend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-backend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -255,7 +255,7 @@ pipeline {
 
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy \
+                                --name trivy-frontend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -267,7 +267,7 @@ pipeline {
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy \
+                                --name trivy-frontend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
