@@ -245,7 +245,37 @@ pipeline {
                                 --format json -o /results/trivy-backend-results.json
                             '''
                         }
-                    }
+                }
+
+                stage('Trivy scanning frontend'){
+                    steps{
+                            sh '''
+
+                                echo "====== Trivy table report frontend======"
+
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                --name trivy \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format table
+
+                                echo "====== Trivy json report frontend======"
+
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-results:/results" \
+                                --name trivy \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format json -o /results/trivy-frontend-results.json
+                            '''
+                        }
+                }
     
             }       
             
