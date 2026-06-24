@@ -13,169 +13,169 @@ pipeline {
 
     stages {
 
-        // stage('Install dependencies'){
-        //     parallel{
+        stage('Install dependencies'){
+            parallel{
 
-        //         stage('Install dependencies backend') {
-        //             steps {
-        //                 dir('backend') {
-        //                     sh 'npm ci --no-audit'
-        //                 }
-        //             }
-        //         }
+                stage('Install dependencies backend') {
+                    steps {
+                        dir('backend') {
+                            sh 'npm ci --no-audit'
+                        }
+                    }
+                }
 
-        //         stage('Install dependencies frontend'){
-        //             steps{
-        //                 dir('frontend'){
-        //                     sh 'npm ci --no-audit'
-        //                 }
-        //             }
-        //         }
+                stage('Install dependencies frontend'){
+                    steps{
+                        dir('frontend'){
+                            sh 'npm ci --no-audit'
+                        }
+                    }
+                }
 
-        //     }
-        // }
+            }
+        }
 
-        // stage('Test backend and frontend'){
-        //     parallel{
+        stage('Test backend and frontend'){
+            parallel{
 
-        //         stage('Test backend') {
-        //             steps {
-        //                 dir('backend') {
-        //                     sh 'npm run test:coverage'
-        //                     sh 'npx prisma validate'
-        //                 }
-        //             }
-        //         }
+                stage('Test backend') {
+                    steps {
+                        dir('backend') {
+                            sh 'npm run test:coverage'
+                            sh 'npx prisma validate'
+                        }
+                    }
+                }
 
-        //         stage('Test frontend') {
-        //             steps {
-        //                 dir('frontend') {
-        //                     sh 'npm run test:coverage'
-        //                     sh 'npm run build'
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                stage('Test frontend') {
+                    steps {
+                        dir('frontend') {
+                            sh 'npm run test:coverage'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+            }
+        }
 
-        // stage('NPM audit'){
-        //     parallel{
+        stage('NPM audit'){
+            parallel{
 
-        //         stage('NPM Dependencies Audit backend') {
-        //             steps {
-        //                 dir('backend') {
-        //                     catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
-        //                         sh '''npm audit --audit-level=high'''
-        //                     }
+                stage('NPM Dependencies Audit backend') {
+                    steps {
+                        dir('backend') {
+                            catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
+                                sh '''npm audit --audit-level=high'''
+                            }
                         
-        //                 }
-        //             }
-        //         }
+                        }
+                    }
+                }
 
-        //         stage('NPM Dependencies Audit frontend') {
-        //             steps {
-        //                 dir('frontend') {
-        //                     catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
-        //                         sh '''npm audit --audit-level=high'''
-        //                     }
+                stage('NPM Dependencies Audit frontend') {
+                    steps {
+                        dir('frontend') {
+                            catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
+                                sh '''npm audit --audit-level=high'''
+                            }
                         
-        //                 }
-        //             }
-        //         }
+                        }
+                    }
+                }
 
-        //     }
-        // }
-
-
-        // stage('OWASP Dependency Check') {
-
-        //     steps {
-
-        //         sh 'rm -rf ./owasp-report/ && mkdir -p owasp-report/'
-
-        //         dependencyCheck ( additionalArguments: '''
-        //             --scan \'./backend\'
-        //             --scan \'./frontend\'
-        //             --out \'./owasp-report/\'
-        //             --format \'ALL\'
-        //             --disableYarnAudit
-        //             --prettyPrint 
-        //             --noupdate
-        //             ''', odcInstallation: 'OWASP-DepCheck-12',
-
-        //         nvdCredentialsId: 'NVD-API-KEY')
-
-        //         junit allowEmptyResults: true, testResults: 'owasp-report/dependency-check-junit.xml'
-
-        //         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report',
-        //          reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
-        //          reportTitles: '', useWrapperFileDirectly: true])
-        //     }
-        // }
+            }
+        }
 
 
+        stage('OWASP Dependency Check') {
 
-        // stage('Sonarqube analysis'){
-        //     parallel{
+            steps {
 
-        //         stage('SonarQube Analysis Backend') {
-        //             steps {
-        //                 dir('backend'){
-        //                     catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-        //                         timeout(time: 5, unit: 'MINUTES') {
-        //                                 withSonarQubeEnv('sonarqube-server') {
+                sh 'rm -rf ./owasp-report/ && mkdir -p owasp-report/'
+
+                dependencyCheck ( additionalArguments: '''
+                    --scan \'./backend\'
+                    --scan \'./frontend\'
+                    --out \'./owasp-report/\'
+                    --format \'ALL\'
+                    --disableYarnAudit
+                    --prettyPrint 
+                    --noupdate
+                    ''', odcInstallation: 'OWASP-DepCheck-12',
+
+                nvdCredentialsId: 'NVD-API-KEY')
+
+                junit allowEmptyResults: true, testResults: 'owasp-report/dependency-check-junit.xml'
+
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './owasp-report',
+                 reportFiles: 'dependency-check-report.html', reportName: 'Dependency Check Report', 
+                 reportTitles: '', useWrapperFileDirectly: true])
+            }
+        }
+
+
+
+        stage('Sonarqube analysis'){
+            parallel{
+
+                stage('SonarQube Analysis Backend') {
+                    steps {
+                        dir('backend'){
+                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                                timeout(time: 5, unit: 'MINUTES') {
+                                        withSonarQubeEnv('sonarqube-server') {
                                         
-        //                                         sh '''
-        //                                             $SONAR_SCANNER/bin/sonar-scanner \
-        //                                                 -Dsonar.sources=src \
-        //                                                 -Dsonar.tests=tests \
-        //                                                 -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-        //                                                 -Dsonar.projectKey=Monitoringsite-backend \
-        //                                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-        //                                                 -X
-        //                                             echo "====== Sonar report task ======="
-        //                                             cat .scannerwork/report-task.txt || true
-        //                                         '''
+                                                sh '''
+                                                    $SONAR_SCANNER/bin/sonar-scanner \
+                                                        -Dsonar.sources=src \
+                                                        -Dsonar.tests=tests \
+                                                        -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                                        -Dsonar.projectKey=Monitoringsite-backend \
+                                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                                        -X
+                                                    echo "====== Sonar report task ======="
+                                                    cat .scannerwork/report-task.txt || true
+                                                '''
                                                                         
-        //                                 }
-        //                             waitForQualityGate abortPipeline: true
-        //                         }
-        //                     }
-        //                 }
-        //             } 
-        //         }
+                                        }
+                                    waitForQualityGate abortPipeline: true
+                                }
+                            }
+                        }
+                    } 
+                }
 
-        //         stage('SonarQube Analysis Frontend') {
-        //             steps {
-        //                 dir('frontend'){
-        //                     catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-        //                         timeout(time: 5, unit: 'MINUTES') {
-        //                                 withSonarQubeEnv('sonarqube-server') {
+                stage('SonarQube Analysis Frontend') {
+                    steps {
+                        dir('frontend'){
+                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                                timeout(time: 5, unit: 'MINUTES') {
+                                        withSonarQubeEnv('sonarqube-server') {
                                             
-        //                                         sh '''
-        //                                             $SONAR_SCANNER/bin/sonar-scanner \
-        //                                                 -Dsonar.sources=src \
-        //                                                 -Dsonar.tests=src \
-        //                                                 -Dsonar.test.inclusions=**/*.test.{js,jsx},**/*.spec.{js,jsx} \
-        //                                                 -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-        //                                                 -Dsonar.projectKey=Monitoringsite-frontend \
-        //                                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-        //                                                 -X
-        //                                             echo "====== Sonar report task ======="
-        //                                             cat .scannerwork/report-task.txt || true
-        //                                         '''                            
-        //                                 }
-        //                             waitForQualityGate abortPipeline: true
-        //                         }
-        //                     }
-        //                 }
+                                                sh '''
+                                                    $SONAR_SCANNER/bin/sonar-scanner \
+                                                        -Dsonar.sources=src \
+                                                        -Dsonar.tests=src \
+                                                        -Dsonar.test.inclusions=**/*.test.{js,jsx},**/*.spec.{js,jsx} \
+                                                        -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                                        -Dsonar.projectKey=Monitoringsite-frontend \
+                                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                                        -X
+                                                    echo "====== Sonar report task ======="
+                                                    cat .scannerwork/report-task.txt || true
+                                                '''                            
+                                        }
+                                    waitForQualityGate abortPipeline: true
+                                }
+                            }
+                        }
                         
-        //             } 
-        //         }
+                    } 
+                }
 
                 
-        //     }
-        // }
+            }
+        }
         
 
         stage('Build docker image'){
@@ -212,78 +212,78 @@ pipeline {
         }
         
 
-        // stage('Trivy scanning monitoring-site'){
-        //     parallel{
+        stage('Trivy scanning monitoring-site'){
+            parallel{
 
-        //         stage('Trivy scanning backend'){
-        //             steps{
-        //                     sh '''
+                stage('Trivy scanning backend'){
+                    steps{
+                            sh '''
 
-        //                         mkdir -p trivy-results
+                                mkdir -p trivy-results
 
-        //                         echo "====== Trivy table report backend======"
+                                echo "====== Trivy table report backend======"
 
-        //                         docker run --rm \
-        //                         -v /var/run/docker.sock:/var/run/docker.sock \
-        //                         --name trivy-backend \
-        //                         aquasec/trivy:latest \
-        //                         image ludoowg/monitoring-site-backend:$GIT_COMMIT \
-        //                         --severity HIGH,CRITICAL \
-        //                         --exit-code 0 \
-        //                         --format table
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                --name trivy-backend \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format table
 
-        //                         echo "====== Trivy json report backend======"
+                                echo "====== Trivy json report backend======"
 
-        //                         docker run --rm \
-        //                         -v /var/run/docker.sock:/var/run/docker.sock \
-        //                         -v "$WORKSPACE/trivy-results:/results" \
-        //                         --name trivy-backend \
-        //                         aquasec/trivy:latest \
-        //                         image ludoowg/monitoring-site-backend:$GIT_COMMIT \
-        //                         --severity HIGH,CRITICAL \
-        //                         --exit-code 0 \
-        //                         --format json -o /results/trivy-backend-results.json
-        //                     '''
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-results:/results" \
+                                --name trivy-backend \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format json -o /results/trivy-backend-results.json
+                            '''
 
-        //                     archiveArtifacts artifacts: 'trivy-results/trivy-backend-results.json', allowEmptyArchive: true
-        //                 }
-        //         }
+                            archiveArtifacts artifacts: 'trivy-results/trivy-backend-results.json', allowEmptyArchive: true
+                        }
+                }
 
-        //         stage('Trivy scanning frontend'){
-        //             steps{
-        //                     sh '''
+                stage('Trivy scanning frontend'){
+                    steps{
+                            sh '''
 
-        //                         echo "====== Trivy table report frontend======"
+                                echo "====== Trivy table report frontend======"
 
-        //                         docker run --rm \
-        //                         -v /var/run/docker.sock:/var/run/docker.sock \
-        //                         --name trivy-frontend \
-        //                         aquasec/trivy:latest \
-        //                         image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
-        //                         --severity HIGH,CRITICAL \
-        //                         --exit-code 0 \
-        //                         --format table
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                --name trivy-frontend \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format table
 
-        //                         echo "====== Trivy json report frontend======"
+                                echo "====== Trivy json report frontend======"
 
-        //                         docker run --rm \
-        //                         -v /var/run/docker.sock:/var/run/docker.sock \
-        //                         -v "$WORKSPACE/trivy-results:/results" \
-        //                         --name trivy-frontend \
-        //                         aquasec/trivy:latest \
-        //                         image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
-        //                         --severity HIGH,CRITICAL \
-        //                         --exit-code 0 \
-        //                         --format json -o /results/trivy-frontend-results.json
-        //                     '''
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-results:/results" \
+                                --name trivy-frontend \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format json -o /results/trivy-frontend-results.json
+                            '''
 
-        //                     archiveArtifacts artifacts: 'trivy-results/trivy-frontend-results.json', allowEmptyArchive: true
-        //                 }
-        //         }
+                            archiveArtifacts artifacts: 'trivy-results/trivy-frontend-results.json', allowEmptyArchive: true
+                        }
+                }
     
-        //     }       
+            }       
             
-        // }
+        }
 
         stage('Push Docker Image'){
             steps{
