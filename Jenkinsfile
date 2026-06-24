@@ -121,31 +121,64 @@ pipeline {
         }
 
 
-        stage('SonarQube Analysis') {
-            steps {
-                catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-                    timeout(time: 5, unit: 'MINUTES') {
-                            withSonarQubeEnv('sonarqube-server') {
-                                dir('backend'){
-                                    sh '''
-                                        $SONAR_SCANNER/bin/sonar-scanner \
-                                            -Dsonar.sources=src \
-                                            -Dsonar.tests=tests \
-                                            -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                                            -Dsonar.projectKey=Monitoringsite-backend \
-                                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                            -X
-                                        echo "====== Sonar report task ======="
-                                        cat .scannerwork/report-task.txt || true
-                                    '''
-                                }                              
+        stage('Sonarqube analysis'){
+            parallel{
+
+                stage('SonarQube Analysis Backend') {
+                    steps {
+                        catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                            timeout(time: 5, unit: 'MINUTES') {
+                                    withSonarQubeEnv('sonarqube-server') {
+                                        dir('backend'){
+                                            sh '''
+                                                $SONAR_SCANNER/bin/sonar-scanner \
+                                                    -Dsonar.sources=src \
+                                                    -Dsonar.tests=tests \
+                                                    -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                                    -Dsonar.projectKey=Monitoringsite-backend \
+                                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                                    -X
+                                                echo "====== Sonar report task ======="
+                                                cat .scannerwork/report-task.txt || true
+                                            '''
+                                        }                              
+                                    }
                             }
-         
-                    }
+                        }
+                        
+                    } 
                 }
+
+                stage('SonarQube Analysis Backend') {
+                    steps {
+                        catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                            timeout(time: 5, unit: 'MINUTES') {
+                                    withSonarQubeEnv('sonarqube-server') {
+                                        dir('frontend'){
+                                            sh '''
+                                                $SONAR_SCANNER/bin/sonar-scanner \
+                                                    -Dsonar.sources=src \
+                                                    -Dsonar.tests=src \
+                                                    -Dsonar.test.inclusions=**/*.test.{js,jsx},**/*.spec.{js,jsx} \
+                                                    -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                                                    -Dsonar.projectKey=Monitoringsite-frontend \
+                                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                                    -X
+                                                echo "====== Sonar report task ======="
+                                                cat .scannerwork/report-task.txt || true
+                                            '''
+                                        }                              
+                                    }
+                            }
+                        }
+                        
+                    } 
+                }
+
                 
-            } 
+            }
         }
+        
 
 
         
