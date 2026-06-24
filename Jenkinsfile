@@ -129,7 +129,8 @@ pipeline {
                                             -Dsonar.tests=tests \
                                             -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
                                             -Dsonar.projectKey=Monitoringsite-backend \
-                                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                            -X
                                     '''
                                 }                              
                             }
