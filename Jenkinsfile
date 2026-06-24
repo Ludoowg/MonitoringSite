@@ -212,23 +212,43 @@ pipeline {
         }
         
 
-        stage('Trivy scanning'){       
-            steps{
-                dir('backend'){
-                    sh '''
-                        docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$WORKSPACE:/trivy-results" \
-                        --name trivy \
-                        aquasec/trivy:latest \
-                        image ludoowg/monitoring-site-backend:$GIT_COMMIT \
-                        --severity LOW,MEDIUM \
-                        --exit-code 0 \
-                        --format json -o /trivy-results/trivy-image-MEDIUM-results.json
-                    '''
-                }
-                
-            }
+        stage('Trivy scanning monitoring-site'){
+            parallel{
+
+                stage('Trivy scanning backend'){
+                    steps{
+                            sh '''
+
+                                mkdir -p trivy-results
+
+                                echo "====== Trivy table report backend======"
+
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                --name trivy \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format table
+
+                                echo "====== Trivy json report backend======"
+
+                                docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-results:/results" \
+                                --name trivy \
+                                aquasec/trivy:latest \
+                                image ludoowg/monitoring-site-backend:$GIT_COMMIT \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format json -o /results/trivy-backend-results.json
+                            '''
+                        }
+                    }
+    
+            }       
+            
         }
 
         // stage('Push Docker Image'){
