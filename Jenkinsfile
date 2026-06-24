@@ -143,6 +143,7 @@ pipeline {
                                             '''
                                         }                              
                                     }
+                                waitForQualityGate abortPipeline: true
                             }
                         }
                         
@@ -169,6 +170,7 @@ pipeline {
                                             '''
                                         }                              
                                     }
+          
                             }
                         }
                         
