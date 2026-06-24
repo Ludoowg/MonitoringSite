@@ -113,12 +113,6 @@ pipeline {
         //     }
         // }
 
-   
-        stage('Debug Jenkinsfile Version') {
-            steps {
-                sh 'echo "VERSION JENKINSFILE TEST 123"'
-            }
-        }
 
 
         stage('Sonarqube analysis'){
@@ -171,7 +165,7 @@ pipeline {
                                                     cat .scannerwork/report-task.txt || true
                                                 '''                            
                                         }
-            
+                                    waitForQualityGate abortPipeline: true
                                 }
                             }
                         }
