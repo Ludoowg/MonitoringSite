@@ -149,7 +149,7 @@ pipeline {
                     } 
                 }
 
-                stage('SonarQube Analysis Backend') {
+                stage('SonarQube Analysis Frontend') {
                     steps {
                         catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
                             timeout(time: 5, unit: 'MINUTES') {
