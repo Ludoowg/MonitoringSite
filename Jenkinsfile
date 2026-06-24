@@ -113,7 +113,11 @@ pipeline {
         //     }
         // }
 
-   
+        stage('Debug Jenkinsfile Version') {
+            steps {
+                sh 'echo "VERSION JENKINSFILE TEST 123"'
+            }
+        }
 
 
 
