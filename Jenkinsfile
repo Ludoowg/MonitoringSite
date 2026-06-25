@@ -1,6 +1,13 @@
 pipeline {
     agent any
 
+    options{
+        buildDiscarder(logRotator(
+            numToKeepStr: '30',
+            artifactNumToKeepStr: '30'
+        ))
+    }
+
     tools {
         nodejs 'nodejs-25-9-0'
     }
@@ -113,8 +120,6 @@ pipeline {
             }
         }
 
-
-
         stage('Sonarqube analysis'){
             parallel{
 
@@ -225,7 +230,6 @@ pipeline {
 
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy-backend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-backend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -237,7 +241,6 @@ pipeline {
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy-backend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-backend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -257,7 +260,6 @@ pipeline {
 
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
-                                --name trivy-frontend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \
@@ -269,7 +271,6 @@ pipeline {
                                 docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-results:/results" \
-                                --name trivy-frontend \
                                 aquasec/trivy:latest \
                                 image ludoowg/monitoring-site-frontend:$GIT_COMMIT \
                                 --severity HIGH,CRITICAL \

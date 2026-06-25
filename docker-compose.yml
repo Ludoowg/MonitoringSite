@@ -13,6 +13,12 @@ services:
       - postgres
     networks:
       - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "-q0-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 
   frontend:
@@ -40,6 +46,11 @@ services:
       - .env
     networks:
       - monitoring-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d monitoringsite"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
   nginx:
