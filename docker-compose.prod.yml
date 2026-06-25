@@ -1,10 +1,7 @@
 services:
 
   backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    image: monitoring-backend
+    image: ludoowg/monitoring-site-backend:latest
     environment:
       - DATABASE_URL=${DATABASE_URL}
     env_file:
@@ -22,14 +19,9 @@ services:
 
 
   frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL}
     env_file:
       - .env
-    image: monitoring-frontend
+    image: ludoowg/monitoring-site-frontend:latest
     networks:
       - monitoring-network
 
