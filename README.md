@@ -12,7 +12,7 @@ I built a website monitoring application: users can register URLs to watch, run 
 
 To keep quality and security under control, I use Jenkins for CI/CD. The pipeline runs dependency checks (npm audit and OWASP Dependency-Check), static analysis with SonarQube on backend and frontend separately, then builds Docker images for both services. Trivy scans those images before they are pushed to my Docker registry. This README documents version 1 of the project: local DevOps setup and the full pipeline.
 
-IMAGE
+![monitoring site](docs/images/dashboardmonito.png)
 
 ---
 
@@ -23,12 +23,9 @@ IMAGE
 3. [Application stack](#3-application-stack)
 4. [Local development](#4-local-development)
 5. [Docker & containerization](#5-docker--containerization)
-6. [Docker Compose (dev vs prod)](#6-docker-compose-dev-vs-prod)
-7. [CI/CD with Jenkins](#7-cicd-with-jenkins)
-8. [Security & quality gates](#8-security--quality-gates)
-9. [Deployment workflow](#9-deployment-workflow)
-10. [Challenges & lessons learned](#10-challenges--lessons-learned)
-11. [Future improvements](#11-future-improvements)
+6. [CI/CD with Jenkins](#6-cicd-with-jenkins)
+
+![CI/CD pipeline monitoringsite project](docs/images/cicdpipeline.png)
 
 ---
 
@@ -53,6 +50,10 @@ The UI is split into four main views:
 - **Monitors** — list of registered sites, add/delete monitors, trigger a manual check
 - **Monitor details** — history of checks for one monitor
 - **Checks** — full history of all checks across every monitor
+
+![monitor page](docs/images/monitormonito.png)
+
+![checks page](docs/images/checksmonito.png)
 
 ### Use case
 
@@ -212,6 +213,26 @@ docker compose up --build
 Docker Compose will build and start the frontend, backend, PostgreSQL database and Nginx reverse proxy services.
 Make sure the required `.env` files are completed before running the command.
 
+If you want to run the project locally using the pre-built Docker images, you can use the production Compose file:
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+This will pull the backend and frontend images from the Docker image repositories configured in `docker-compose.prod.yml`, instead of rebuilding them locally from the Dockerfiles.
+
+If a deployment introduces an issue, the application can be rolled back by changing the image tag in `docker-compose.prod.yml` to a previous `$GIT_COMMIT` tag and restarting the services:
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Using Git commit tags makes deployments more traceable and allows the application to be restored to a previously validated image version.
+
+![docker compose up](docs/images/dockercomposeup.png)
+
 ---
 
 ## 5. Docker & containerization
@@ -239,6 +260,8 @@ To avoid keeping too many old build files and reports, the pipeline is configure
 
 The Jenkins pipeline is composed of several stages:
 
+![jenkins step](docs/images/jenkinsstep.png)
+
 #### 1. Install Dependencies
 
 The pipeline starts by installing backend and frontend dependencies in parallel.
@@ -260,6 +283,8 @@ The audit is configured to detect high severity vulnerabilities. During developm
 OWASP Dependency-Check is used to complement `npm audit` by scanning the backend and frontend dependencies for known CVEs.
 The scan is executed on both folders and generates a global dependency report. The HTML report is then published in Jenkins, making it easier to review vulnerable dependencies, CVE references and possible remediation actions.
 
+![owasp](docs/images/owaspcheck.png)
+
 #### 5. SonarQube Analysis
 
 SonarQube is used to analyze code quality, maintainability, reliability, test coverage and potential bugs.
@@ -274,6 +299,8 @@ SonarQube helps detect issues such as:
 - test coverage gaps
 
 The pipeline also uses a Quality Gate to decide whether the code quality is acceptable before continuing.
+
+![sonarqube](docs/images/sonarqube.png)
 
 #### 6. Docker Image Build
 
@@ -295,25 +322,16 @@ Trivy is used to scan the backend and frontend Docker images for vulnerabilities
 The pipeline scans both images and focuses on `HIGH` and `CRITICAL` vulnerabilities. The table output is displayed directly in the Jenkins logs, while the JSON reports are archived as Jenkins artifacts for later review.
 This helps verify that the final Docker images do not contain critical vulnerabilities before being pushed to the registry.
 
+
+![trivy](docs/images/trivyscanning.png)
+
+
 #### 8. Push to Docker Hub
 
 Once the images have been built and scanned, the pipeline pushes them to Docker Hub.
 Both the `$GIT_COMMIT` and `latest` tags are pushed for the backend and frontend images.
 The images are publicly available on Docker Hub and can be pulled to run the application without rebuilding it locally.
 
-
----
-
-## 9. Deployment workflow
-
-**Topics to cover:**
-
-- Pull and run on a machine: `docker compose -f docker-compose.prod.yml pull && up -d`
-- How migrations run on first deploy
-- Rollback idea (previous image tag)
-
-IMAGE
-
----
+![dockerhub](docs/images/dockerhub.png)
 
 
