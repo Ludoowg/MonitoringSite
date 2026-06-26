@@ -12,7 +12,8 @@ I built a website monitoring application: users can register URLs to watch, run 
 
 To keep quality and security under control, I use Jenkins for CI/CD. The pipeline runs dependency checks (npm audit and OWASP Dependency-Check), static analysis with SonarQube on backend and frontend separately, then builds Docker images for both services. Trivy scans those images before they are pushed to my Docker registry. This README documents version 1 of the project: local DevOps setup and the full pipeline.
 
-![monitoring site](docs/images/dashboardmonito.png)
+![CI/CD pipeline monitoringsite project](docs/images/cicdpipeline.png)
+
 
 ---
 
@@ -25,7 +26,6 @@ To keep quality and security under control, I use Jenkins for CI/CD. The pipelin
 5. [Docker & containerization](#5-docker--containerization)
 6. [CI/CD with Jenkins](#6-cicd-with-jenkins)
 
-![CI/CD pipeline monitoringsite project](docs/images/cicdpipeline.png)
 
 ---
 
@@ -78,7 +78,7 @@ The app targets a simple operational need: know quickly if a website or API endp
 
 ### V2 — planned direction
 
-Move from Docker Compose on a single machine to Kubernetes, and add observability ( Prometheus + Grafana) to monitor the monitoring platform itself.
+Move from Docker Compose on a single machine to Kubernetes, and add observability (Prometheus + Grafana) to monitor the monitoring platform itself.
 
 ### Learning goals
 
@@ -132,6 +132,9 @@ Only Nginx publishes a port to the host. Backend, frontend, and Postgres stay on
 | `docker-compose.yml` | **Local dev** — builds images from `backend/Dockerfile` and `frontend/Dockerfile` (`build:`) |
 | `docker-compose.prod.yml` | **Prod-like run** — pulls pre-built images from Docker Hub (`image: ludoowg/monitoring-site-*`) |
 
+### Two Nginx layers (frontend only)
+
+For page requests, traffic passes through two Nginx instances: the **reverse proxy** (routing) and the **static file server** inside the frontend image (serving the Vite build). They are not redundant — each image stays self-contained.
 
 ---
 
@@ -140,59 +143,60 @@ Only Nginx publishes a port to the host. Backend, frontend, and Postgres stay on
 
 ### 3.1 Frontend (React + Vite)
 
+Main pages: **Dashboard**, **Monitors**, **Monitor details**, **Checks** — routed with React Router. Data fetching uses React Query (`@tanstack/react-query`) and HTTP calls go through a shared Axios client.
 
-IMAGE MAINPAGE AND OTHER PAGE 
+The API base URL is set with `VITE_API_URL` so the same build can target different environments. In Docker, the variable is passed as a **build argument** because Vite injects it into the static bundle at compile time.
 
-### Frontend API Communication
-
-The frontend uses Axios to send HTTP requests to the backend API.  
-The API base URL is configured with the `VITE_API_URL` environment variable, which makes it possible to switch the backend API endpoint depending on the environment.
-The frontend is built into static files and served by an Nginx static web server running inside the frontend container on port 80.
+The production build is copied into an Nginx image and served on port 80 inside the frontend container.
 
 ### 3.2 Backend (Node.js + Express + Prisma)
 
+The backend uses Prisma as an ORM to talk to PostgreSQL — not to communicate with the frontend.
 
-The backend uses Prisma as an ORM to interact with the PostgreSQL database.
-The Prisma schema is intentionally simple and contains two main models: `Monitor` and `Check`. A monitor represents a website or service that needs to be monitored, while a check represents the result of a monitoring attempt, including its status and response time.
-The schema also defines enums such as `MonitorStatus` and `CheckStatus` to keep the application states consistent and easier to manage.
-The backend exposes API routes to perform CRUD operations on monitors and to manage monitoring checks. It also provides a `/health` route, which can be used to verify that the backend service is running correctly.
-During container startup, Prisma migrations are applied with `prisma migrate deploy` to ensure that the database schema is up to date before the backend starts handling requests. This helps prevent inconsistencies between the backend code, Prisma schema and PostgreSQL database. 
+The Prisma schema defines two models: `Monitor` and `Check`, plus enums `MonitorStatus` and `CheckStatus`. A monitor is a URL to watch; a check stores the result of one HTTP probe (status, response time, errors).
 
+Main API routes (all under `/api`):
+
+- `GET /api/health` — backend liveness check (used by Docker healthcheck)
+- CRUD on `/api/monitors` and manual checks via `POST /api/monitors/:id/check`
+- `GET /api/checks` and per-monitor check history
+
+At container startup, `prisma migrate deploy` runs before `npm start`, so the database schema matches the code before any request is handled.
 
 ---
 
 ## 4. Local development
 
+Developed on macOS (Apple Silicon) with Node.js and Docker Desktop.
 
-## Local Development Setup
+**Prerequisites:** Node.js 20+, Docker Desktop, Git.
 
-This project was developed on a MacBook Pro M2 using Node.js and Docker Desktop for Mac.
-To run the project locally, Node.js and Docker Desktop must be installed on the machine.
-The project uses environment variables to manage configuration and sensitive values. Local `.env` files are used for the backend, the frontend and the root Docker Compose setup. These files are not committed to Git in order to avoid exposing sensitive data.
+Environment variables live in `.env` files (never committed). Example files document required keys:
 
-Example environment files are provided to document the required variables:
+| File | Used for |
+|------|----------|
+| `.env.example` | Root — Docker Compose (`DATABASE_URL`, Postgres, `VITE_API_URL`, `PORT`) |
+| `backend/.env.example` | Backend without Docker (`PORT=5000`, local Postgres URL) |
+| `frontend/.env.example` | Frontend without Docker (`VITE_API_URL` → backend on port 5000) |
 
-```text
-backend/.env.example
-frontend/.env.example
-.env.example
+Copy examples before first run:
+
+```bash
+cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
-
-Before running the project, copy the example files and complete them with your local values.
 
 ### Run without Docker
 
-Clone the repository and install the dependencies in both the backend and frontend folders.
-
-Backend:
+You need a local PostgreSQL instance matching `DATABASE_URL` in `backend/.env`.
 
 ```bash
 cd backend
 npm install
+npx prisma migrate dev
 npm run dev
 ```
-
-Frontend:
 
 ```bash
 cd frontend
@@ -200,18 +204,26 @@ npm install
 npm run dev
 ```
 
-Make sure all required environment variables are correctly defined before starting the services.
+| Service | URL |
+|---------|-----|
+| Frontend (Vite) | http://localhost:5173 |
+| Backend API | http://localhost:5000/api |
+| Health check | http://localhost:5000/api/health |
 
 ### Run with Docker Compose
 
-From the root of the project, run:
+From the project root:
 
 ```bash
 docker compose up --build
-``` 
+```
 
-Docker Compose will build and start the frontend, backend, PostgreSQL database and Nginx reverse proxy services.
-Make sure the required `.env` files are completed before running the command.
+This builds and starts nginx, frontend, backend, and PostgreSQL. Postgres uses a named volume for data persistence. Prefer pinning the Postgres image (e.g. `postgres:16-alpine`) in Compose to avoid breaking changes on the `latest` tag.
+
+| Service | URL |
+|---------|-----|
+| Application (via Nginx) | http://localhost:8081 |
+| API health | http://localhost:8081/api/health |
 
 If you want to run the project locally using the pre-built Docker images, you can use the production Compose file:
 
@@ -318,10 +330,9 @@ Using separate images for the backend and frontend makes it possible to update, 
 
 #### 7. Trivy Image Scan
 
-Trivy is used to scan the backend and frontend Docker images for vulnerabilities.
-The pipeline scans both images and focuses on `HIGH` and `CRITICAL` vulnerabilities. The table output is displayed directly in the Jenkins logs, while the JSON reports are archived as Jenkins artifacts for later review.
-This helps verify that the final Docker images do not contain critical vulnerabilities before being pushed to the registry.
+Trivy scans both images for `HIGH` and `CRITICAL` vulnerabilities. Table output appears in the Jenkins logs; JSON reports are archived as artifacts.
 
+Unlike the SonarQube Quality Gate (`abortPipeline: true`), Trivy is configured with `--exit-code 0`, so **the pipeline does not fail** when vulnerabilities are found — results are for review before push. To block the build on critical CVEs, set `--exit-code 1` (or a dedicated threshold).
 
 ![trivy](docs/images/trivyscanning.png)
 
@@ -334,4 +345,14 @@ The images are publicly available on Docker Hub and can be pulled to run the app
 
 ![dockerhub](docs/images/dockerhub.png)
 
+---
+
+## Quick reference
+
+| Context | Command |
+|---------|---------|
+| Dev stack (build) | `docker compose up --build` |
+| Prod-like stack (pull) | `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d` |
+| API health (Docker) | `curl http://localhost:8081/api/health` |
+| Docker Hub images | `ludoowg/monitoring-site-backend`, `ludoowg/monitoring-site-frontend` |
 
