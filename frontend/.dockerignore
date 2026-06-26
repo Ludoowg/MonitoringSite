@@ -1,6 +1,8 @@
 # Dependencies
 node_modules
 npm-debug.log
+yarn-error.log
+pnpm-debug.log
 
 # Git
 .git
@@ -11,24 +13,31 @@ npm-debug.log
 .env
 .env.*
 
+
+# Build output
+dist
+build
+
 # Tests and coverage
 coverage
 .scannerwork
-owasp-report
-trivy-results
 
 # Cache
 .cache
+.vite
+.tmp
+.temp
+
+# OS / editor files
+.DS_Store
+.vscode
+.idea
+
+# CI/CD and reports
+Jenkinsfile
+Dockerfile.jenkins
+owasp-report
+trivy-results
 
 # Documentation
 *.md
-!README*.md
-
-# CI/CD files
-Jenkinsfile
-Dockerfile.jenkins
-
-# Docker files
-Dockerfile
-docker-compose.yml
-docker-compose.*.yml

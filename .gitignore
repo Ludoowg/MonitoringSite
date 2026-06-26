@@ -50,3 +50,6 @@ secrets/
 data/
 postgres-data/
 jenkins-data/
+
+#Dockerfile for jenkins
+Dockerfile.jenkins
