@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset 
+
+spec:
+  selector:
+    matchLabels: 
+      app: postgres
+  replicas: 1
+  serviceName: postgres-service
+  template:
+    metadata:
+      labels:
+        app: postgres
+
+    spec:
+      containers:
+      - name: postgres
+        image: postgres
+
+        ports:
+        - containerPort: 5432
+
+        volumeMounts:
+        - name: postgresvolume
+          mountPath: /var/lib/postgresql
+
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-secrets
+                key: POSTGRES_USER
+
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secrets
+                key: POSTGRES_PASSWORD
+
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: db-secrets
+                key: POSTGRES_DB
+
+        resources:
+          requests: 
+            cpu: "50m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+
+      volumes:
+      - name: postgresvolume
+        persistentVolumeClaim:
+          claimName: postgres-pvc 

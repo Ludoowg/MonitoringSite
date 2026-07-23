@@ -1,0 +1,14 @@
+resources:
+  - backend-depl.yaml
+  - backend-service.yaml
+  - frontend-depl.yaml
+  - frontend-service.yaml
+  - gateway.yaml
+  - httproute.yaml
+  - postgres-pvc.yaml
+  - postgres-service.yaml
+  - postgres-statefulset.yaml
+  
+namespace:
+  monitoring-site
+  

@@ -1,0 +1,7 @@
+resources:
+  - ../../base
+  - backend-hpa.yaml 
+
+patches:
+  - path: backend-patch.yaml
+  - path: frontend-patch.yaml
