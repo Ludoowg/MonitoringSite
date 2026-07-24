@@ -314,8 +314,8 @@ pipeline {
 
                         cd k8s/overlays/prod
 
-                        kustomize edit set image ludoowg/monitoring-site-frontend:$GIT_COMMIT
-                        kustomize edit set image ludoowg/monitoring-site-frontend:$GIT_COMMIT
+                        kustomize edit set image ludoowg/monitoring-site-frontend=ludoowg/monitoring-site-frontend:$GIT_COMMIT
+                        kustomize edit set image ludoowg/monitoring-site-backend=ludoowg/monitoring-site-backend:$GIT_COMMIT
 
                         cd ../../..
 
@@ -324,7 +324,7 @@ pipeline {
 
                         git commit -m "Image updated , commit tag:$GIT_COMMIT [skip ci]"
 
-                        git push https://$username:token@github.com/ludoowg/monitoringsite.git HEAD:main
+                        git push https://$username:$token@github.com/ludoowg/monitoringsite.git HEAD:main
                     
                     '''
                 }
