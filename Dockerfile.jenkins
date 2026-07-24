@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y lsb-release ca-certificates curl libato
     | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && apt-get install -y docker-ce-cli && \
     apt-get install -y postgresql-client && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash && \
+    mv kustomize /usr/local/bin/kustomize && \ 
+    chmod +x /usr/local/bin/kustomize && \ 
+    apt-get clean && rm -rf /var/lib/apt/lists/* 
 USER jenkins
 RUN jenkins-plugin-cli --plugins "blueocean docker-workflow json-path-api"

@@ -303,7 +303,36 @@ pipeline {
             }
         }
 
+        stage('Update image with Kustomize'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'token', usernameVariable: 'username')]) {
+                    sh '''
+                        set -e
+
+                        git config user.name "Jenkins"
+                        git config user.email "jenkins@local"
+
+                        cd k8s/overlays/prod
+
+                        kustomize edit set image ludoowg/monitoring-site-frontend:$GIT_COMMIT
+                        kustomize edit set image ludoowg/monitoring-site-frontend:$GIT_COMMIT
+
+                        cd ../../..
+
+                        git add k8s/overlays/prod/kustomization.yaml
+                        git diff --cached --quiet && echo "Nothing changes" && exit 0
+
+                        git commit -m "Image updated , commit tag:$GIT_COMMIT [skip ci]"
+
+                        git push https://$username:token@github.com/ludoowg/monitoringsite.git HEAD:main
+                    
+                    '''
+                }
+            }
+        }
+
     }
 }
+
 
 
