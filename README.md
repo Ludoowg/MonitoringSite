@@ -2,7 +2,7 @@
 
 **Stack:** React + Vite (frontend) · Node.js + Express + Prisma (backend) · PostgreSQL · Nginx · Docker · Jenkins
 
-**Pipeline:** npm audit · OWASP Dependency-Check · SonarQube · Docker image build · Trivy · push to Docker Hub
+**Pipeline:** npm audit · OWASP Dependency-Check · SonarQube · Docker image build · Trivy · push to Docker Hub · push to Docker Hub
 
 ---
 

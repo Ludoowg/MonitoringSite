@@ -54,3 +54,5 @@ jenkins-data/
 #Dockerfile for jenkins
 Dockerfile.jenkins
 
+#Logbook
+DEVOPS_PROGRESS.md
