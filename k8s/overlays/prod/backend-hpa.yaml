@@ -2,6 +2,8 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: backend-hpa 
+namespace:
+  monitoring-site
 
 spec: 
   scaleTargetRef:

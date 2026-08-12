@@ -210,6 +210,7 @@ pipeline {
                             -f Dockerfile \
                             -t ludoowg/monitoring-site-frontend:$GIT_COMMIT \
                             -t ludoowg/monitoring-site-frontend:latest \
+                            --build-arg VITE_API_URL=/api \
                             .
                            '''
                         }

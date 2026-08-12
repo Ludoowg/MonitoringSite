@@ -10,7 +10,6 @@ pnpm-debug.log
 .github/
 
 # Environment variables
-.env
 .env.*
 
 
