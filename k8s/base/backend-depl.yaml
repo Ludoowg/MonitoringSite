@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
 
 spec:
   replicas: 2
@@ -18,7 +20,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ludoowg/monitoring-site-backend
+        image: ludoowg/monitoring-site-backend:latest
 
         ports:
         - containerPort: 3000

@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
 
 
 spec:
@@ -19,7 +21,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ludoowg/monitoring-site-frontend
+        image: ludoowg/monitoring-site-frontend:latest
 
         ports:
         - containerPort: 80

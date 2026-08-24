@@ -2,6 +2,8 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: backend-hpa 
+  annotations:
+    argocd.argoproj.io/sync-wave: '4'
 namespace:
   monitoring-site
 

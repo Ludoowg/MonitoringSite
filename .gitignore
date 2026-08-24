@@ -56,3 +56,6 @@ Dockerfile.jenkins
 
 #Logbook
 DEVOPS_PROGRESS.md
+
+#Bootstrap
+k8s/bootstrap/

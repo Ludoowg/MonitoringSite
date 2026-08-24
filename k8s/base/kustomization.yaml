@@ -8,6 +8,7 @@ resources:
   - postgres-pvc.yaml
   - postgres-service.yaml
   - postgres-statefulset.yaml
+  - monsealedsecret.yaml
   
 namespace:
   monitoring-site
