@@ -5,12 +5,12 @@ resources:
 patches:
 - path: backend-patch.yaml
 - path: frontend-patch.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-images:
-- name: ludoowg/monitoring-site-backend
-  newName: ludoowg/monitoring-site-backend
-  newTag: cca05908159bc52da35f020f29c195a9bff466d9
-- name: ludoowg/monitoring-site-frontend
-  newName: ludoowg/monitoring-site-frontend
-  newTag: cca05908159bc52da35f020f29c195a9bff466d9
+# apiVersion: kustomize.config.k8s.io/v1beta1
+# kind: Kustomization
+# images:
+# - name: ludoowg/monitoring-site-backend
+#   newName: ludoowg/monitoring-site-backend
+#   newTag: cca05908159bc52da35f020f29c195a9bff466d9
+# - name: ludoowg/monitoring-site-frontend
+#   newName: ludoowg/monitoring-site-frontend
+#   newTag: cca05908159bc52da35f020f29c195a9bff466d9
