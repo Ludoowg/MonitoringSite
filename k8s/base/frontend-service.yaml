@@ -1,7 +1,26 @@
 apiVersion: v1
 kind: Service 
 metadata:
-  name: frontend-service
+  name: frontend-service-active
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+
+
+---  
+
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: frontend-service-preview
   annotations:
     argocd.argoproj.io/sync-wave: '2'
 

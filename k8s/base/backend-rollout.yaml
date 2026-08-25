@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: backend
   annotations:
@@ -13,6 +13,7 @@ spec:
       app: backend
 
   template:
+
     metadata:
       labels:
         app: backend
@@ -51,3 +52,8 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3
+  strategy:
+    blueGreen:
+      activeService: backend-service-active
+      previewService: backend-service-preview
+      autoPromotionEnabled: false

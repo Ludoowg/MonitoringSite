@@ -1,7 +1,7 @@
 resources:
-  - backend-depl.yaml
+  - backend-rollout.yaml
   - backend-service.yaml
-  - frontend-depl.yaml
+  - frontend-rollout.yaml
   - frontend-service.yaml
   - gateway.yaml
   - httproute.yaml
