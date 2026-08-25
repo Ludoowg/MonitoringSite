@@ -1,16 +1,10 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
-metadata:
-  name: frontend
-
-patch: |-
-  - op: add
-    path: /spec/template/spec/containers/0/resources
-      value:
-        requests: 
-          cpu: "50m"
-          memory: "128Mi"
-        limits:
-          cpu: "250m"
-          memory: "256Mi"
+- op: add
+  path: /spec/template/spec/containers/0/resources
+  value:
+    requests: 
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
 
