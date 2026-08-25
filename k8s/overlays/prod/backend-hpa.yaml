@@ -4,8 +4,8 @@ metadata:
   name: backend-hpa 
   annotations:
     argocd.argoproj.io/sync-wave: '4'
-namespace:
-  monitoring-site
+  namespace:
+    monitoring-site
 
 spec: 
   scaleTargetRef:
