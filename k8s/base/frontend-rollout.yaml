@@ -46,8 +46,8 @@ spec:
           failureThreshold: 3
 
   strategy:
-  blueGreen:
-    activeService: frontend-service-active
-    previewService: frontend-service-preview
-    autoPromotionEnabled: false
+    blueGreen:
+      activeService: frontend-service-active
+      previewService: frontend-service-preview
+      autoPromotionEnabled: false
   
