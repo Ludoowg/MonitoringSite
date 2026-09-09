@@ -59,3 +59,6 @@ DEVOPS_PROGRESS.md
 
 #Bootstrap
 k8s/bootstrap/
+
+#nginx dossier
+nginx/

@@ -1,185 +1,157 @@
-# Monitoring Site — DevOps (local deployment)
+# Monitoring Site — DevOps, CI/CD & GitOps
 
-**Stack:** React + Vite (frontend) · Node.js + Express + Prisma (backend) · PostgreSQL · Nginx · Docker · Jenkins  
+Monitoring Site is a full-stack uptime monitoring application and a production-like DevOps lab. It demonstrates the complete path from source code to a controlled Kubernetes release using Jenkins, Docker, ArgoCD, Sealed Secrets, and Argo Rollouts.
 
-**Pipeline:** npm audit · OWASP Dependency-Check · SonarQube · Docker image build · Trivy · push to Docker Hub 
+The application remains a portfolio POC rather than a public multi-tenant SaaS. The infrastructure evolved from a Docker Compose deployment into a local Kubernetes GitOps platform.
 
----
+## Highlights
 
-## Introduction
+- Full-stack monitoring application built with React, Express, Prisma, and PostgreSQL
+- Multi-stage Docker images for independent frontend and backend releases
+- Jenkins pipeline covering tests, quality checks, dependency audits, image scanning, and publication
+- Immutable Docker image tags based on the Git commit SHA
+- Kustomize base with development and production overlays
+- GitOps reconciliation, pruning, and drift correction with ArgoCD
+- Encrypted Git-managed credentials with Sealed Secrets
+- Blue/green frontend and backend releases with manual promotion using Argo Rollouts
+- Gateway API routing, health probes, persistent storage, and backend autoscaling
 
-I built a website monitoring application: users can register URLs to watch, run health checks, and review status and history. The stack is a React frontend for the UI, a Node.js backend with Prisma for the API and data access, and PostgreSQL for persistent storage.
+## Architecture
 
-To keep quality and security under control, I use Jenkins for CI/CD. The pipeline runs dependency checks (npm audit and OWASP Dependency-Check), static analysis with SonarQube on backend and frontend separately, then builds Docker images for both services. Trivy scans those images before they are pushed to my Docker registry. This README documents version 1 of the project: local DevOps setup and the full pipeline.
+```mermaid
+flowchart LR
+    Developer[Developer] -->|push| GitHub[GitHub]
+    GitHub --> Jenkins[Jenkins CI]
+    Jenkins -->|versioned images| Registry[Docker Hub]
+    Jenkins -->|update image tags| GitHub
 
-![CI/CD pipeline monitoringsite project](docs/images/cicdpipeline.png)
+    GitHub -->|desired state| ArgoCD[ArgoCD]
+    ArgoCD --> Kustomize[Kustomize]
+    Kustomize --> Cluster[Kubernetes]
 
+    User[Browser] --> Gateway[NGINX Gateway API]
+    Gateway -->|/| FrontendActive[Frontend active Service]
+    Gateway -->|/api| BackendActive[Backend active Service]
 
----
+    FrontendActive --> FrontendRollout[Frontend Rollout]
+    BackendActive --> BackendRollout[Backend Rollout]
+    BackendRollout --> Postgres[(PostgreSQL + PVC)]
 
-## Table of contents
+    Sealed[Sealed Secrets] --> Secret[db-secrets]
+    Secret --> BackendRollout
+    Secret --> Postgres
 
-1. [Project overview & goals](#1-project-overview--goals)
-2. [Architecture](#2-architecture)
-3. [Application stack](#3-application-stack)
-4. [Local development](#4-local-development)
-5. [Docker & containerization](#5-docker--containerization)
-6. [CI/CD with Jenkins](#6-cicd-with-jenkins)
-
-
----
-
-## 1. Project overview & goals
-
-### What the application does
-
-Monitoring Site is a lightweight uptime monitoring tool. You register **monitors** (URLs to watch), run **checks** against them, and see whether each site is responding correctly.
-
-Each check measures the HTTP response and assigns a status:
-
-| Status | Meaning |
-|--------|---------|
-| **UP** | Response OK (2xx–3xx) within the configured threshold |
-| **SLOW** | Response OK but slower than the threshold |
-| **DOWN** | HTTP error (4xx/5xx) or network failure |
-| **UNKNOWN** | Monitor created but not checked yet |
-
-The UI is split into four main views:
-
-- **Dashboard** — global summary (counts of UP / DOWN / SLOW), recent checks, and monitor overview
-- **Monitors** — list of registered sites, add/delete monitors, trigger a manual check
-- **Monitor details** — history of checks for one monitor
-- **Checks** — full history of all checks across every monitor
-
-![monitor page](docs/images/monitormonito.png)
-
-![checks page](docs/images/checksmonito.png)
-
-### Use case
-
-The app targets a simple operational need: know quickly if a website or API endpoint is reachable and how fast it responds. It is a **V1 POC** — suitable for personal use, demos, or learning — not a multi-tenant SaaS with authentication or alerting yet.
-
-### Version 1 — scope
-
-**Included:**
-
-- Full-stack app (React + Vite frontend, Node.js + Express + Prisma backend, PostgreSQL)
-- Containerized with Docker (separate images for backend and frontend, Nginx reverse proxy)
-- Runnable locally via Docker Compose (dev and prod compose files)
-- Automated tests (Jest backend, Vitest frontend) with coverage
-- Jenkins CI/CD pipeline: npm audit, OWASP Dependency-Check, SonarQube, Docker build, Trivy scan, push to Docker Hub
-
-**Out of scope for V1:**
-
-- Production deployment on a remote server (images are built and pushed, but deploy is manual)
-- Kubernetes orchestration
-- Infrastructure monitoring (Prometheus, Grafana)
-- User accounts, roles, or email/Slack alerts
-
-### V2 — planned direction
-
-Move from Docker Compose on a single machine to Kubernetes, and add observability (Prometheus + Grafana) to monitor the monitoring platform itself.
-
-### Learning goals
-
-The main objective of this first version is to understand the full lifecycle of a full-stack application with DevOps practices: design the app, write and run tests, containerize services, wire a CI/CD pipeline, and apply security and quality checks before publishing images. Docker Compose and Jenkins are the foundation; Kubernetes comes in V2.
-
----
-
-
-## 2. Architecture
-
-### Request flow
-
-When a user opens the app, everything goes through the **browser**. The only service exposed on the host is the **reverse-proxy Nginx** (`localhost:8081`).
-
-**Loading the UI (`/`):**
-
-```
-Browser → Nginx (reverse proxy, :8081)
-        → Frontend container (Nginx static server, :80)
-        → React build (HTML / JS / CSS)
+    Metrics[metrics-server] --> HPA[Backend HPA]
+    HPA --> BackendRollout
 ```
 
-**API calls (`/api/...`):**
-
-```
-Browser → Nginx (reverse proxy, :8081)
-        → Backend (Express, :3000)
-        → PostgreSQL (via Prisma)
+```text
+Code push → Jenkins → Docker Hub → image tag committed to Git
+          → ArgoCD → Kustomize → Argo Rollouts → Kubernetes
 ```
 
-### Services (4 containers)
+## Application
 
-| Service | Role | Exposed to host? |
-|---------|------|------------------|
-| **nginx** | Reverse proxy — routes `/` and `/api/` | Yes (`8081:80`) |
-| **frontend** | Serves the built React app (Nginx as static file server) | No (internal only) |
-| **backend** | REST API (Express + Prisma) | No (internal only) |
-| **postgres** | Persistent data storage | No (internal only) |
+Users can register URLs, trigger HTTP checks, and inspect uptime status and response history.
 
+Each check produces one of four states:
 
-### Docker network
+- `UP`: successful response within the configured threshold
+- `SLOW`: successful response above the response-time threshold
+- `DOWN`: HTTP error or network failure
+- `UNKNOWN`: monitor has not been checked yet
 
-All services run on the same bridge network: `monitoring-network`. Containers resolve each other by **service name** (`frontend`, `backend`, `postgres`) — Docker’s embedded DNS. 
+The interface contains a dashboard, monitor list, monitor details, and global check history.
 
-Only Nginx publishes a port to the host. Backend, frontend, and Postgres stay on the internal network. That **reduces the attack surface**: fewer entry points from outside Docker, even though services still talk to each other inside the stack.
+![Monitoring dashboard](docs/images/dashboardmonito.png)
 
-### Dev vs prod Compose files
+![Monitor management](docs/images/monitormonito.png)
 
-| File | Purpose |
-|------|---------|
-| `docker-compose.yml` | **Local dev** — builds images from `backend/Dockerfile` and `frontend/Dockerfile` (`build:`) |
-| `docker-compose.prod.yml` | **Prod-like run** — pulls pre-built images from Docker Hub (`image: ludoowg/monitoring-site-*`) |
+## Technology stack
 
-### Two Nginx layers (frontend only)
+**Application**
 
-For page requests, traffic passes through two Nginx instances: the **reverse proxy** (routing) and the **static file server** inside the frontend image (serving the Vite build). They are not redundant — each image stays self-contained.
+- React 18, Vite, React Router, React Query, Axios
+- Node.js, Express 5, Zod, Prisma
+- PostgreSQL
 
----
+**CI and security**
 
+- Jenkins
+- Jest and Vitest
+- npm audit and OWASP Dependency-Check
+- SonarQube
+- Trivy
 
-## 3. Application stack
+**Containers and delivery**
 
-### 3.1 Frontend (React + Vite)
+- Docker and Docker Compose
+- Docker Hub
+- Kubernetes and Kustomize
+- ArgoCD
+- Sealed Secrets
+- Argo Rollouts
+- NGINX Gateway Fabric and Gateway API
+- metrics-server and HPA
 
-Main pages: **Dashboard**, **Monitors**, **Monitor details**, **Checks** — routed with React Router. Data fetching uses React Query (`@tanstack/react-query`) and HTTP calls go through a shared Axios client.
+## Evolution of the project
 
-The API base URL is set with `VITE_API_URL` so the same build can target different environments. In Docker, the variable is passed as a **build argument** because Vite injects it into the static bundle at compile time.
+### V1 — Docker and Jenkins
 
-The production build is copied into an Nginx image and served on port 80 inside the frontend container.
+The first version established the application, local Docker Compose architecture, and Jenkins pipeline. Nginx was the only service exposed to the host and routed `/` to the frontend and `/api` to the backend. Backend, frontend, and PostgreSQL remained on an internal Docker network.
 
-### 3.2 Backend (Node.js + Express + Prisma)
+The pipeline installs dependencies, runs backend and frontend tests, performs quality and security checks, builds separate Docker images, scans them, and publishes both commit-specific and `latest` tags to Docker Hub.
 
-The backend uses Prisma as an ORM to talk to PostgreSQL — not to communicate with the frontend.
+![CI/CD pipeline](docs/images/cicdpipeline.png)
 
-The Prisma schema defines two models: `Monitor` and `Check`, plus enums `MonitorStatus` and `CheckStatus`. A monitor is a URL to watch; a check stores the result of one HTTP probe (status, response time, errors).
+### V2 — Kubernetes and GitOps
 
-Main API routes (all under `/api`):
+The second version moved orchestration to Kubernetes:
 
-- `GET /api/health` — backend liveness check (used by Docker healthcheck)
-- CRUD on `/api/monitors` and manual checks via `POST /api/monitors/:id/check`
-- `GET /api/checks` and per-monitor check history
+- Kustomize generates development and production configurations from a shared base.
+- ArgoCD continuously reconciles the production overlay from Git.
+- Sealed Secrets allows the encrypted PostgreSQL Secret to be versioned safely.
+- Argo Rollouts replaces Deployments with controlled blue/green releases.
+- Active and preview Services separate stable traffic from release validation.
+- Gateway API routes browser and API traffic to the active versions.
+- The backend HPA scales its Rollout between 2 and 4 replicas from CPU metrics.
 
-At container startup, `prisma migrate deploy` runs before `npm start`, so the database schema matches the code before any request is handled.
+The Kubernetes environment currently runs locally with Docker Desktop.
 
----
+## Key technical decisions
 
-## 4. Local development
+### ArgoCD instead of deploying from Jenkins
 
-Developed on macOS (Apple Silicon) with Node.js and Docker Desktop.
+Jenkins builds, validates, and publishes artifacts, but does not run `kubectl apply`. It commits the new immutable image tags to Git. ArgoCD then reconciles the cluster, keeping Git as the deployment source of truth and avoiding direct cluster credentials in Jenkins.
 
-**Prerequisites:** Node.js 20+, Docker Desktop, Git.
+### Sealed Secrets instead of plaintext Kubernetes Secrets
 
-Environment variables live in `.env` files (never committed). Example files document required keys:
+The plaintext Secret remains local. Only a SealedSecret encrypted for the cluster is committed. ArgoCD applies it, and the Sealed Secrets controller creates the Kubernetes Secret without exposing plaintext values in Git.
 
-| File | Used for |
-|------|----------|
-| `.env.example` | Root — Docker Compose (`DATABASE_URL`, Postgres, `VITE_API_URL`, `PORT`) |
-| `backend/.env.example` | Backend without Docker (`PORT=5000`, local Postgres URL) |
-| `frontend/.env.example` | Frontend without Docker (`VITE_API_URL` → backend on port 5000) |
+### Blue/green releases
 
-Copy examples before first run:
+The stable version continues serving users while a candidate version starts behind a preview Service. Automatic promotion is disabled so the candidate can be checked before the active Service switches to it.
+
+### Kustomize overlays
+
+A shared base avoids duplicating manifests, while overlays customize replica counts, resources, HPA configuration, and production image tags.
+
+### Stateful PostgreSQL
+
+PostgreSQL uses a StatefulSet, stable internal Service, and PersistentVolumeClaim. Database data survives pod recreation as long as the underlying volume is retained.
+
+## Challenges and lessons learned
+
+- Resolved a conflicting GatewayClass by letting NGINX Gateway Fabric own the class installed by Helm.
+- Replaced strategic merge patches with JSON 6902 patches when Kustomize could not safely merge container fields in the Rollout CRD.
+- Added ArgoCD `ignoreDifferences` for the backend Rollout replica field so self-healing does not conflict with HPA decisions.
+- Diagnosed an ArgoCD Application deletion blocked by its resource finalizer.
+- Migrated from a manually created Secret to a SealedSecret compatible with GitOps.
+- Separated permanent Kubernetes resources and sync waves from temporary ArgoCD hooks.
+
+## Local Docker usage
+
+Copy the example environment files:
 
 ```bash
 cp .env.example .env
@@ -187,172 +159,38 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-### Run without Docker
-
-You need a local PostgreSQL instance matching `DATABASE_URL` in `backend/.env`.
-
-```bash
-cd backend
-npm install
-npx prisma migrate dev
-npm run dev
-```
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-| Service | URL |
-|---------|-----|
-| Frontend (Vite) | http://localhost:5173 |
-| Backend API | http://localhost:5000/api |
-| Health check | http://localhost:5000/api/health |
-
-### Run with Docker Compose
-
-From the project root:
+Build and start the local stack:
 
 ```bash
 docker compose up --build
 ```
 
-This builds and starts nginx, frontend, backend, and PostgreSQL. Postgres uses a named volume for data persistence. Prefer pinning the Postgres image (e.g. `postgres:16-alpine`) in Compose to avoid breaking changes on the `latest` tag.
+Open:
 
-| Service | URL |
-|---------|-----|
-| Application (via Nginx) | http://localhost:8081 |
-| API health | http://localhost:8081/api/health |
+- Application: http://localhost:8081
+- API health: http://localhost:8081/api/health
 
-If you want to run the project locally using the pre-built Docker images, you can use the production Compose file:
+Pre-built images can be used with:
 
 ```bash
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-This will pull the backend and frontend images from the Docker image repositories configured in `docker-compose.prod.yml`, instead of rebuilding them locally from the Dockerfiles.
+## Documentation
 
-If a deployment introduces an issue, the application can be rolled back by changing the image tag in `docker-compose.prod.yml` to a previous `$GIT_COMMIT` tag and restarting the services:
+- [Jenkins CI/CD pipeline](docs/ci-cd.md)
+- [Kubernetes, ArgoCD, Sealed Secrets, and Argo Rollouts](docs/kubernetes.md)
+- [Backend API documentation](backend/README.md)
 
-```bash
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
-```
+## Current scope and next steps
 
-Using Git commit tags makes deployments more traceable and allows the application to be restored to a previously validated image version.
+This project demonstrates a local production-like delivery platform. It is not currently deployed as a public production service.
 
-![docker compose up](docs/images/dockercomposeup.png)
+Planned improvements:
 
----
-
-## 5. Docker & containerization
-
-
-### Docker Images and Build Strategy
-
-The project uses two separate Docker images: one for the frontend and one for the backend.
-This separation makes the architecture easier to maintain because both services have different technologies, dependencies and runtime requirements. It also allows each service to be built, updated, scanned and deployed independently without affecting the other one.
-Both Dockerfiles use multi-stage builds in order to reduce the final image size and keep only the files required at runtime.
-For the frontend image, the Docker Compose configuration passes `VITE_API_URL` as a build argument. This is required because Vite environment variables are injected at build time into the generated static files, instead of being read dynamically at container runtime.
-The backend Dockerfile generates the Prisma Client during the image build. At container startup, the backend runs Prisma migrations with `prisma migrate deploy` before starting the Node.js server. This ensures that the database schema is up to date before the application starts handling requests.
-Both the frontend and backend folders include a `.dockerignore` file to reduce the Docker build context. This prevents unnecessary or sensitive files such as `node_modules`, `.env`, coverage reports, cache files and local development artifacts from being sent to the Docker daemon during the build.
-
-
----
-
-## 6. CI/CD with Jenkins
-
-This project includes a Jenkins CI/CD pipeline used to automate testing, code quality analysis, security checks, Docker image builds and image publishing.
-Jenkins runs locally inside a Docker container and must be configured with the required tools and plugins, including Node.js, OWASP Dependency-Check, SonarQube Scanner, Docker and the HTML Publisher plugin.
-To avoid keeping too many old build files and reports, the pipeline is configured to keep only the last 30 builds and the last 30 archived artifacts.
-
-### Pipeline Overview
-
-The Jenkins pipeline is composed of several stages:
-
-![jenkins step](docs/images/jenkinsstep.png)
-
-#### 1. Install Dependencies
-
-The pipeline starts by installing backend and frontend dependencies in parallel.
-It uses `npm ci` instead of `npm install` to ensure deterministic dependency installation based on the `package-lock.json` file. This makes CI/CD and Docker builds more reproducible and prevents unexpected dependency updates during automated builds.
-
-#### 2. Tests and Build Validation
-
-The backend and frontend are tested in parallel.
-For the backend, the pipeline runs Jest tests with coverage and executes `npx prisma validate` to make sure the Prisma schema is valid.
-For the frontend, the pipeline runs Vitest tests with coverage and also executes a production build. This build validation ensures that the React/Vite application can be compiled successfully before creating the Docker image.
-
-#### 3. NPM Audit
-
-The pipeline runs `npm audit` on both the backend and the frontend dependencies.
-The audit is configured to detect high severity vulnerabilities. During development, this stage is wrapped with `catchError` so that detected vulnerabilities mark the build as unstable instead of completely stopping the workflow.
-
-#### 4. OWASP Dependency-Check
-
-OWASP Dependency-Check is used to complement `npm audit` by scanning the backend and frontend dependencies for known CVEs.
-The scan is executed on both folders and generates a global dependency report. The HTML report is then published in Jenkins, making it easier to review vulnerable dependencies, CVE references and possible remediation actions.
-
-![owasp](docs/images/owaspcheck.png)
-
-#### 5. SonarQube Analysis
-
-SonarQube is used to analyze code quality, maintainability, reliability, test coverage and potential bugs.
-The backend and frontend are analyzed as two separate SonarQube projects. This separation makes the results easier to understand because both parts of the application have different codebases, test reports and responsibilities.
-
-SonarQube helps detect issues such as:
-- bugs
-- code smells
-- duplicated code
-- maintainability issues
-- reliability issues
-- test coverage gaps
-
-The pipeline also uses a Quality Gate to decide whether the code quality is acceptable before continuing.
-
-![sonarqube](docs/images/sonarqube.png)
-
-#### 6. Docker Image Build
-
-After the code, tests and security checks have been validated, the pipeline builds two separate Docker images:
-
-- `ludoowg/monitoring-site-backend`
-- `ludoowg/monitoring-site-frontend`
-
-Each image is built with two tags:
-
-- `$GIT_COMMIT`, to keep a precise and traceable version of the image
-- `latest`, to identify the most recent build
-
-Using separate images for the backend and frontend makes it possible to update, scan and deploy each service independently.
-
-#### 7. Trivy Image Scan
-
-Trivy scans both images for `HIGH` and `CRITICAL` vulnerabilities. Table output appears in the Jenkins logs; JSON reports are archived as artifacts.
-
-Unlike the SonarQube Quality Gate (`abortPipeline: true`), Trivy is configured with `--exit-code 0`, so **the pipeline does not fail** when vulnerabilities are found — results are for review before push. To block the build on critical CVEs, set `--exit-code 1` (or a dedicated threshold).
-
-![trivy](docs/images/trivyscanning.png)
-
-
-#### 8. Push to Docker Hub
-
-Once the images have been built and scanned, the pipeline pushes them to Docker Hub.
-Both the `$GIT_COMMIT` and `latest` tags are pushed for the backend and frontend images.
-The images are publicly available on Docker Hub and can be pulled to run the application without rebuilding it locally.
-
-![dockerhub](docs/images/dockerhub.png)
-
----
-
-## Quick reference
-
-| Context | Command |
-|---------|---------|
-| Dev stack (build) | `docker compose up --build` |
-| Prod-like stack (pull) | `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d` |
-| API health (Docker) | `curl http://localhost:8081/api/health` |
-| Docker Hub images | `ludoowg/monitoring-site-backend`, `ludoowg/monitoring-site-frontend` |
-
+- Prometheus, Grafana, centralized logs, and alerting
+- Kubernetes RBAC, NetworkPolicies, and security contexts
+- PostgreSQL backup and restore procedures
+- Dedicated Prisma migration Job
+- Remote cluster deployment with TLS and DNS
