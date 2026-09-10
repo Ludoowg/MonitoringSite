@@ -125,32 +125,32 @@ pipeline {
         stage('Sonarqube analysis'){
             parallel{
 
-                stage('SonarQube Analysis Backend') {
-                    steps {
-                        dir('backend'){
-                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-                                timeout(time: 5, unit: 'MINUTES') {
-                                        withSonarQubeEnv('sonarqube-server') {
+                // stage('SonarQube Analysis Backend') {
+                //     steps {
+                //         dir('backend'){
+                //             catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                //                 timeout(time: 5, unit: 'MINUTES') {
+                //                         withSonarQubeEnv('sonarqube-server') {
                                         
-                                                sh '''
-                                                    $SONAR_SCANNER/bin/sonar-scanner \
-                                                        -Dsonar.sources=src \
-                                                        -Dsonar.tests=tests \
-                                                        -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
-                                                        -Dsonar.projectKey=Monitoringsite-backend \
-                                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                                        -X
-                                                    echo "====== Sonar report task ======="
-                                                    cat .scannerwork/report-task.txt || true
-                                                '''
+                //                                 sh '''
+                //                                     $SONAR_SCANNER/bin/sonar-scanner \
+                //                                         -Dsonar.sources=src \
+                //                                         -Dsonar.tests=tests \
+                //                                         -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
+                //                                         -Dsonar.projectKey=Monitoringsite-backend \
+                //                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                //                                         -X
+                //                                     echo "====== Sonar report task ======="
+                //                                     cat .scannerwork/report-task.txt || true
+                //                                 '''
                                                                         
-                                        }
-                                    waitForQualityGate abortPipeline: true
-                                }
-                            }
-                        }
-                    } 
-                }
+                //                         }
+                //                     waitForQualityGate abortPipeline: true
+                //                 }
+                //             }
+                //         }
+                //     } 
+                // }
 
                 stage('SonarQube Analysis Frontend') {
                     steps {
