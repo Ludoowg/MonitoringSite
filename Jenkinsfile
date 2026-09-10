@@ -23,13 +23,13 @@ pipeline {
         stage('Install dependencies'){
             parallel{
 
-                stage('Install dependencies backend') {
-                    steps {
-                        dir('backend') {
-                            sh 'npm ci --no-audit'
-                        }
-                    }
-                }
+                // stage('Install dependencies backend') {
+                //     steps {
+                //         dir('backend') {
+                //             sh 'npm ci --no-audit'
+                //         }
+                //     }
+                // }
 
                 stage('Install dependencies frontend'){
                     steps{
@@ -184,39 +184,39 @@ pipeline {
         }     
 
 
-        stage('Build docker image'){
-            parallel{
+        // stage('Build docker image'){
+        //     parallel{
 
-                stage('Build docker image backend'){
-                    steps{
-                        dir('backend'){
-                            sh '''
-                            docker build \
-                            -f Dockerfile \
-                            -t ludoowg/monitoring-site-backend:$GIT_COMMIT \
-                            -t ludoowg/monitoring-site-backend:latest \
-                            .
-                           '''
-                        }
-                    }
-                }
+        //         stage('Build docker image backend'){
+        //             steps{
+        //                 dir('backend'){
+        //                     sh '''
+        //                     docker build \
+        //                     -f Dockerfile \
+        //                     -t ludoowg/monitoring-site-backend:$GIT_COMMIT \
+        //                     -t ludoowg/monitoring-site-backend:latest \
+        //                     .
+        //                    '''
+        //                 }
+        //             }
+        //         }
 
-                stage('Build docker image frontend'){
-                    steps{
-                        dir('frontend'){
-                            sh '''
-                            docker build \
-                            -f Dockerfile \
-                            -t ludoowg/monitoring-site-frontend:$GIT_COMMIT \
-                            -t ludoowg/monitoring-site-frontend:latest \
-                            --build-arg VITE_API_URL=/api \
-                            .
-                           '''
-                        }
-                    }
-                }
-            }
-        }
+        //         stage('Build docker image frontend'){
+        //             steps{
+        //                 dir('frontend'){
+        //                     sh '''
+        //                     docker build \
+        //                     -f Dockerfile \
+        //                     -t ludoowg/monitoring-site-frontend:$GIT_COMMIT \
+        //                     -t ludoowg/monitoring-site-frontend:latest \
+        //                     --build-arg VITE_API_URL=/api \
+        //                     .
+        //                    '''
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         
 
         // stage('Trivy scanning monitoring-site'){
@@ -289,47 +289,47 @@ pipeline {
         // }
 
 
-        stage('Push Docker Image'){
-            steps{
-                    withDockerRegistry(credentialsId: 'docker-repo', url: '') {
-                    sh '''
-                        docker push ludoowg/monitoring-site-backend:$GIT_COMMIT
-                        docker push ludoowg/monitoring-site-backend:latest
+        // stage('Push Docker Image'){
+        //     steps{
+        //             withDockerRegistry(credentialsId: 'docker-repo', url: '') {
+        //             sh '''
+        //                 docker push ludoowg/monitoring-site-backend:$GIT_COMMIT
+        //                 docker push ludoowg/monitoring-site-backend:latest
 
-                        docker push ludoowg/monitoring-site-frontend:$GIT_COMMIT
-                        docker push ludoowg/monitoring-site-frontend:latest
-                    '''
-                }
-            }
-        }
+        //                 docker push ludoowg/monitoring-site-frontend:$GIT_COMMIT
+        //                 docker push ludoowg/monitoring-site-frontend:latest
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Update image with Kustomize'){
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'token', usernameVariable: 'username')]) {
-                    sh '''
-                        set -e
+        // stage('Update image with Kustomize'){
+        //     steps{
+        //         withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'token', usernameVariable: 'username')]) {
+        //             sh '''
+        //                 set -e
 
-                        git config user.name "Jenkins"
-                        git config user.email "jenkins@local"
+        //                 git config user.name "Jenkins"
+        //                 git config user.email "jenkins@local"
 
-                        cd k8s/overlays/prod
+        //                 cd k8s/overlays/prod
 
-                        kustomize edit set image ludoowg/monitoring-site-frontend=ludoowg/monitoring-site-frontend:$GIT_COMMIT
-                        kustomize edit set image ludoowg/monitoring-site-backend=ludoowg/monitoring-site-backend:$GIT_COMMIT
+        //                 kustomize edit set image ludoowg/monitoring-site-frontend=ludoowg/monitoring-site-frontend:$GIT_COMMIT
+        //                 kustomize edit set image ludoowg/monitoring-site-backend=ludoowg/monitoring-site-backend:$GIT_COMMIT
 
-                        cd ../../..
+        //                 cd ../../..
 
-                        git add k8s/overlays/prod/kustomization.yaml
-                        git diff --cached --quiet && echo "Nothing changes" && exit 0
+        //                 git add k8s/overlays/prod/kustomization.yaml
+        //                 git diff --cached --quiet && echo "Nothing changes" && exit 0
 
-                        git commit -m "Image updated , commit tag:$GIT_COMMIT [skip ci]"
+        //                 git commit -m "Image updated , commit tag:$GIT_COMMIT [skip ci]"
 
-                        git push https://$username:$token@github.com/ludoowg/monitoringsite.git HEAD:main
+        //                 git push https://$username:$token@github.com/ludoowg/monitoringsite.git HEAD:main
                     
-                    '''
-                }
-            }
-        }
+        //             '''
+        //         }
+        //     }
+        // }
 
     }
 }
