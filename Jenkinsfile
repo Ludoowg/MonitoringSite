@@ -156,7 +156,7 @@ pipeline {
                     steps {
                         dir('frontend'){
                             catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-                                timeout(time: 5, unit: 'MINUTES') {
+                                // timeout(time: 5, unit: 'MINUTES') {
                                         withSonarQubeEnv('sonarqube-server') {
                                             
                                                 sh '''
@@ -173,7 +173,7 @@ pipeline {
                                                 '''                            
                                         }
                                     waitForQualityGate abortPipeline: true
-                                }
+                                // }
                             }
                         }
                         
