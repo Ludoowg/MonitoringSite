@@ -2,23 +2,23 @@ resources:
 - ../../base
 - backend-hpa.yaml
 
-patches:
-  - path: backend-patch.yaml
-    target:
-      kind: Rollout
-      name: backend
 
-  - path: frontend-patch.yaml
-    target:
-      kind: Rollout
-      name: frontend
+patches:
+- path: backend-patch.yaml
+  target:
+    kind: Rollout
+    name: backend
+- path: frontend-patch.yaml
+  target:
+    kind: Rollout
+    name: frontend
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: ludoowg/monitoring-site-backend
   newName: ludoowg/monitoring-site-backend
-  newTag: cca05908159bc52da35f020f29c195a9bff466d9
+  newTag: 1377f564cc6821f96787dfd0fad78f9df7f90c49
 - name: ludoowg/monitoring-site-frontend
   newName: ludoowg/monitoring-site-frontend
-  newTag: cca05908159bc52da35f020f29c195a9bff466d9
+  newTag: 1377f564cc6821f96787dfd0fad78f9df7f90c49
