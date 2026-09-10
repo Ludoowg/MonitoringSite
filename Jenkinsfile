@@ -122,10 +122,7 @@ pipeline {
         }
 
 
-        stage('Sonarqube analysis'){
-
-
-                stage('SonarQube Analysis Backend') {
+        stage('SonarQube Analysis Backend') {
                     steps {
                         dir('backend'){
                             catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'SUCCESS') {
@@ -148,10 +145,10 @@ pipeline {
                                 // }
                             }
                         }
-                    } 
-                }
+                    }
+        }
 
-                stage('SonarQube Analysis Frontend') {
+        stage('SonarQube Analysis Frontend') {
                     steps {
                         dir('frontend'){
                             catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'SUCCESS') {
@@ -175,10 +172,8 @@ pipeline {
                             }
                         }
                         
-                    } 
-                       
-            }
-        }     
+                    }
+        }
 
 
         stage('Build docker image'){
