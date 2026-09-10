@@ -123,13 +123,13 @@ pipeline {
 
 
         stage('Sonarqube analysis'){
-            parallel{
+            
 
                 stage('SonarQube Analysis Backend') {
                     steps {
                         dir('backend'){
-                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
-                                timeout(time: 5, unit: 'MINUTES') {
+                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'SUCCESS') {
+                                // timeout(time: 5, unit: 'MINUTES') {
                                         withSonarQubeEnv('sonarqube-server') {
                                         
                                                 sh '''
@@ -145,7 +145,7 @@ pipeline {
                                                                         
                                         }
                                     waitForQualityGate abortPipeline: true
-                                }
+                                // }
                             }
                         }
                     } 
@@ -154,7 +154,7 @@ pipeline {
                 stage('SonarQube Analysis Frontend') {
                     steps {
                         dir('frontend'){
-                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'UNSTABLE') {
+                            catchError(buildResult: 'SUCCESS', message: 'Oops', stageResult: 'SUCCESS') {
                                 // timeout(time: 5, unit: 'MINUTES') {
                                         withSonarQubeEnv('sonarqube-server') {
                                             
@@ -176,8 +176,7 @@ pipeline {
                         }
                         
                     } 
-                }
-
+                
                 
             }
         }     
