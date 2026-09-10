@@ -167,7 +167,6 @@ pipeline {
                                                         -Dsonar.exclusions=**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/dependency-check-*.html,**/dependency-check-*.xml,**/dependency-check-report.json \
                                                         -Dsonar.projectKey=Monitoringsite-frontend \
                                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                                        -X
                                                     echo "====== Sonar report task ======="
                                                     cat .scannerwork/report-task.txt || true
                                                 '''                            
