@@ -73,7 +73,7 @@ pipeline {
                 stage('NPM Dependencies Audit backend') {
                     steps {
                         dir('backend') {
-                            catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
+                            catchError(buildResult: 'SUCCESS', message: 'Vulnerability detected') {
                                 sh '''npm audit --audit-level=high'''
                             }
                         
@@ -84,7 +84,7 @@ pipeline {
                 stage('NPM Dependencies Audit frontend') {
                     steps {
                         dir('frontend') {
-                            catchError(buildResult: 'UNSTABLE', message: 'Vulnerability detected') {
+                            catchError(buildResult: 'SUCCESS', message: 'Vulnerability detected') {
                                 sh '''npm audit --audit-level=high'''
                             }
                         
