@@ -123,7 +123,7 @@ pipeline {
 
 
         stage('Sonarqube analysis'){
-            
+
 
                 stage('SonarQube Analysis Backend') {
                     steps {
@@ -176,8 +176,7 @@ pipeline {
                         }
                         
                     } 
-                
-                
+                       
             }
         }     
 
