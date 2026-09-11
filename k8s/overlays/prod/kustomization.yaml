@@ -18,7 +18,7 @@ kind: Kustomization
 images:
 - name: ludoowg/monitoring-site-backend
   newName: ludoowg/monitoring-site-backend
-  newTag: 57838609d5d6fde43c0261665f006c2c3152990f
+  newTag: 18c22e72938ca21507eaaf2887848bed6d3743e6
 - name: ludoowg/monitoring-site-frontend
   newName: ludoowg/monitoring-site-frontend
-  newTag: 57838609d5d6fde43c0261665f006c2c3152990f
+  newTag: 18c22e72938ca21507eaaf2887848bed6d3743e6
