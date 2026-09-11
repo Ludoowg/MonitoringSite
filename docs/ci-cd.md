@@ -10,7 +10,7 @@ Jenkins runs locally in a Docker container built from `Dockerfile.jenkins`. It i
 
 Credentials used by the pipeline are stored in Jenkins rather than committed to Git. The pipeline also uses a build discarder to retain only the latest 30 builds and archived artifacts.
 
-![Jenkins pipeline stages](images/jenkinsstep.png)
+![Successful Jenkins pipeline](images/jenkinsgood.png)
 
 ## Pipeline stages
 
@@ -65,7 +65,9 @@ Trivy scans both images for `HIGH` and `CRITICAL` vulnerabilities. Human-readabl
 
 After validation, Jenkins pushes both the commit-specific and `latest` tags to Docker Hub.
 
-![Published Docker images](images/dockerhub.png)
+The backend repository illustrates the same tagging strategy used for both backend and frontend images:
+
+![Docker Hub backend image with latest and commit SHA tags](images/dockerhubbackend.png)
 
 ### 8. GitOps handoff
 

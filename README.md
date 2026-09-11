@@ -16,34 +16,11 @@ The application remains a portfolio POC rather than a public multi-tenant SaaS. 
 - Blue/green frontend and backend releases with manual promotion using Argo Rollouts
 - Gateway API routing, health probes, persistent storage, and backend autoscaling
 
-## Architecture
+## Delivery workflow
 
-```mermaid
-flowchart LR
-    Developer[Developer] -->|push| GitHub[GitHub]
-    GitHub --> Jenkins[Jenkins CI]
-    Jenkins -->|versioned images| Registry[Docker Hub]
-    Jenkins -->|update image tags| GitHub
+Jenkins owns continuous integration: it tests and analyzes the code, builds the Docker images, scans them, and pushes immutable commit tags to Docker Hub. It then updates those image tags in Git.
 
-    GitHub -->|desired state| ArgoCD[ArgoCD]
-    ArgoCD --> Kustomize[Kustomize]
-    Kustomize --> Cluster[Kubernetes]
-
-    User[Browser] --> Gateway[NGINX Gateway API]
-    Gateway -->|/| FrontendActive[Frontend active Service]
-    Gateway -->|/api| BackendActive[Backend active Service]
-
-    FrontendActive --> FrontendRollout[Frontend Rollout]
-    BackendActive --> BackendRollout[Backend Rollout]
-    BackendRollout --> Postgres[(PostgreSQL + PVC)]
-
-    Sealed[Sealed Secrets] --> Secret[db-secrets]
-    Secret --> BackendRollout
-    Secret --> Postgres
-
-    Metrics[metrics-server] --> HPA[Backend HPA]
-    HPA --> BackendRollout
-```
+ArgoCD owns continuous delivery: it detects the new desired state, renders the production Kustomize overlay, and reconciles the Kubernetes cluster. Argo Rollouts prepares the candidate backend and frontend versions, which are validated through preview Services before manual promotion.
 
 ```text
 Code push → Jenkins → Docker Hub → image tag committed to Git
@@ -102,7 +79,11 @@ The first version established the application, local Docker Compose architecture
 
 The pipeline installs dependencies, runs backend and frontend tests, performs quality and security checks, builds separate Docker images, scans them, and publishes both commit-specific and `latest` tags to Docker Hub.
 
-![CI/CD pipeline](docs/images/cicdpipeline.png)
+![Successful Jenkins CI/CD pipeline](docs/images/jenkinsgood.png)
+
+The backend repository below demonstrates the tagging strategy used for both application images: `latest` identifies the newest build, while commit SHA tags preserve traceable and immutable versions.
+
+![Docker Hub backend image with latest and commit SHA tags](docs/images/dockerhubbackend.png)
 
 ### V2 — Kubernetes and GitOps
 
@@ -117,6 +98,22 @@ The second version moved orchestration to Kubernetes:
 - The backend HPA scales its Rollout between 2 and 4 replicas from CPU metrics.
 
 The Kubernetes environment currently runs locally with Docker Desktop.
+
+### GitOps reconciliation
+
+The ArgoCD application view provides a single representation of the desired resources and their live Kubernetes state. The production application is synchronized and healthy, including its Rollouts, Services, PostgreSQL resources, Gateway API resources, HPA, and SealedSecret.
+
+![ArgoCD application healthy and synchronized](docs/images/argocd.png)
+
+### Blue/green promotion
+
+During a release, the existing revision remains stable and active while the candidate revision is available through the preview Service. Automatic promotion is disabled so the candidate can be validated first.
+
+![Argo Rollouts candidate revision before promotion](docs/images/rolloutbeforepromote.png)
+
+After manual promotion, the candidate becomes the stable and active revision. The previous revision remains available temporarily for rollback.
+
+![Argo Rollouts revision after promotion](docs/images/rolloutafterpromote.png)
 
 ## Key technical decisions
 

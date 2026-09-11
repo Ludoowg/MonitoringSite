@@ -72,6 +72,10 @@ ArgoCD is installed in its own namespace, while its CLI runs on the local machin
 
 The `monitoring-site-prod` Application watches the repository's `k8s/overlays/prod` path and deploys it to the `monitoring-site` namespace. Git is the source of truth: ArgoCD compares the desired state stored in Git with the live cluster state and reconciles differences. Kubernetes remains responsible for scheduling and running workloads.
 
+The application tree shows the resources managed by ArgoCD and their relationships in the cluster:
+
+![ArgoCD application healthy and synchronized](images/argocd.png)
+
 The complete delivery flow is:
 
 ```text
@@ -130,6 +134,10 @@ Each Rollout uses two Services:
 
 Because `autoPromotionEnabled` is set to `false`, a candidate version is not promoted automatically. The preview can be inspected first, then promoted manually. The controller updates the active Service selector to send traffic to the new ReplicaSet.
 
+Before promotion, the new revision is marked as preview while the previous revision remains stable and active:
+
+![Argo Rollouts candidate revision before promotion](images/rolloutbeforepromote.png)
+
 For example, the frontend preview can be reached locally with:
 
 ```bash
@@ -142,6 +150,10 @@ Rollout status and promotion can be controlled with the Argo Rollouts kubectl pl
 kubectl argo rollouts status frontend -n monitoring-site
 kubectl argo rollouts promote frontend -n monitoring-site
 ```
+
+After promotion, the candidate revision becomes stable and active:
+
+![Argo Rollouts revision after promotion](images/rolloutafterpromote.png)
 
 Blue/green was selected because the local cluster can temporarily run the stable and preview versions in parallel. A canary strategy would instead expose a gradually increasing share of traffic to the candidate release, with additional routing and analysis configuration.
 
