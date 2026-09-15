@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-service-monitor
+  labels:
+    release: prometheus
+spec:
+  endpoints:
+    - interval: 30s
+      port: http
+      path: /api/metrics
+  selector:
+    matchLabels:
+      monitoring: backend-active
