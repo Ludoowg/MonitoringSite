@@ -191,3 +191,9 @@ Planned improvements:
 - PostgreSQL backup and restore procedures
 - Dedicated Prisma migration Job
 - Remote cluster deployment with TLS and DNS
+
+ERREUR : 
+
+{"error":{"message":"\nInvalid `prisma.monitor.findMany()` invocation in\n/Users/smily/Documents/DevOps/MonitoringSite/backend/src/repositories/monitor.repository.js:6:18\n\n  3 const create = (data) => prisma.monitor.create({ data });\n  4 \n  5 const findAll = () =>\n→ 6   prisma.monitor.findMany(\nCan't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`.","statusCode":500}}
+
+CAR PAS DE POSTGRESQL EN LOCAL, TEST A FAIRE DIRECTEMENT AVEC K8S...

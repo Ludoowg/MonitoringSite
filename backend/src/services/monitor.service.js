@@ -1,6 +1,8 @@
+const { monitor } = require("../config/prisma");
 const monitorRepository = require("../repositories/monitor.repository");
 const ApiError = require("../utils/ApiError");
 const { MONITOR_STATUS } = require("../utils/status");
+const { monitorsByStatus } = require('../../metrics/prometheus_client')
 
 const createMonitor = async (payload) =>
   monitorRepository.create({
@@ -9,6 +11,40 @@ const createMonitor = async (payload) =>
   });
 
 const listMonitors = async () => monitorRepository.findAll();
+
+const updateMonitorsByStatusMetric = async() => {
+
+  const monitors = await listMonitors(); 
+
+    let countUNKNOWN = 0;
+    let countUP = 0;
+    let countDOWN = 0;
+    let countSLOW = 0;
+
+  for ( let x = 0; x < monitors.length; x++){
+
+    if (monitors[x].status === MONITOR_STATUS.UNKNOWN) {
+      countUNKNOWN++;
+    }
+    else if (monitors[x].status === MONITOR_STATUS.UP) {
+      countUP++;
+    }
+    else if (monitors[x].status === MONITOR_STATUS.DOWN) {
+      countDOWN++;
+    }
+    else if (monitors[x].status === MONITOR_STATUS.SLOW){
+      countSLOW++;
+    }
+
+  }
+
+  monitorsByStatus.set({ status: 'UNKNOWN' }, countUNKNOWN);
+  monitorsByStatus.set({ status: 'UP' }, countUP);
+  monitorsByStatus.set({ status: 'DOWN' }, countDOWN);
+  monitorsByStatus.set({ status: 'SLOW' }, countSLOW);
+
+}
+
 
 const getMonitorById = async (id) => {
   const monitor = await monitorRepository.findById(id);
@@ -40,4 +76,5 @@ module.exports = {
   updateMonitor,
   deleteMonitor,
   updateMonitorStatus,
+  updateMonitorsByStatusMetric
 };
