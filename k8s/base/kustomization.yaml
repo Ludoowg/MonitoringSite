@@ -9,6 +9,7 @@ resources:
   - postgres-service.yaml
   - postgres-statefulset.yaml
   - monsealedsecret.yaml
+  - backend-service-monitor.yaml
   
 namespace:
   monitoring-site
